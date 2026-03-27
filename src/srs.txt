@@ -1,0 +1,116 @@
+MẪU ĐẶC TẢ YÊU CẦU DỰ ÁN (SRS)
+[IT203B- K24] - Java Advanced
+Mã dự án: PRJ-MEETING-JAVA-05
+Tên đề tài: Hệ thống Quản lý Đặt phòng họp & Dịch vụ Văn phòng
+1. Tổng quan Dự án (Project Overview)
+1.1. Bối cảnh
+ Trong các tòa nhà văn phòng, trung tâm đào tạo hoặc công ty vừa và lớn, việc quản lý phòng họp, thiết bị hội nghị và các yêu cầu dịch vụ đi kèm (nước uống, ăn nhẹ, vệ sinh) thường được thực hiện qua sổ sách hoặc tin nhắn nội bộ, dẫn đến các vấn đề:
+Xung đột lịch sử dụng phòng họp.
+Thiếu thiết bị hỗ trợ khi diễn ra cuộc họp.
+Không kiểm soát được chi phí phát sinh từ các dịch vụ.
+1.2. Mục tiêu hệ thống
+ Xây dựng một ứng dụng chạy trên môi trường console (dòng lệnh) giúp:
+Nhân viên đặt phòng họp, theo dõi trạng thái phòng, yêu cầu dịch vụ hỗ trợ.
+Bộ phận quản lý văn phòng (Admin) tối ưu việc sắp xếp phòng, quản lý thiết bị và giám sát chi phí.
+Nhân viên hỗ trợ cập nhật tiến độ chuẩn bị phòng và thiết bị.
+Lưu ý quan trọng cho sinh viên
+Đây là tài liệu đặc tả yêu cầu (SRS).
+Sinh viên tự phân tích nghiệp vụ, bao gồm:
+Thiết kế CSDL MySQL.
+Xây dựng luồng xử lý.
+Thiết kế class, DAO (JDBC), Service.
+Không có sẵn database hoặc flow chuẩn.
+
+2. Đối tượng người dùng (User Roles)
+2.1. Nhân viên (Employee)
+Đăng ký tài khoản (nếu chưa có).
+Đặt phòng họp, chọn thiết bị và dịch vụ đi kèm.
+Xem lịch họp của bản thân và trạng thái chuẩn bị.
+Hủy lịch họp khi chưa được duyệt.
+2.2. Nhân viên hỗ trợ (Support Staff)
+Xem danh sách cuộc họp được phân công.
+Cập nhật trạng thái chuẩn bị phòng, thiết bị.
+2.3. Quản trị viên (Admin)
+Quản lý phòng họp, thiết bị di động, dịch vụ đi kèm.
+Duyệt hoặc từ chối yêu cầu đặt phòng.
+Phân công nhân viên hỗ trợ cho từng lịch họp.
+Quản lý người dùng (tạo tài khoản Support Staff, Admin).
+
+3. Yêu cầu chức năng cơ bản (Bắt buộc)
+Sinh viên bắt buộc hoàn thành đầy đủ, chạy ổn định.
+3.1. Phân hệ Tài khoản & Xác thực
+Đăng ký / Đăng nhập: Hỗ trợ đăng nhập theo phân quyền (Employee, Support Staff, Admin) qua username/password.
+Quản lý hồ sơ cá nhân: Cho phép nhân viên xem và cập nhật thông tin liên hệ, phòng ban, số điện thoại nội bộ.
+3.2. Phân hệ Quản lý Phòng họp & Thiết bị (Admin Only)
+CRUD Phòng họp: Thêm, sửa, xóa, xem danh sách phòng họp (tên phòng, sức chứa, vị trí, thiết bị cố định).
+CRUD Thiết bị di động: Quản lý thiết bị dùng chung (máy chiếu, loa di động, bảng tương tác…) với các thông tin: tên thiết bị, tổng số lượng, số lượng khả dụng, tình trạng hoạt động.
+3.3. Phân hệ Đặt phòng & Yêu cầu dịch vụ
+Nhân viên đặt phòng:
+Chọn phòng, khung giờ (ca sáng/chiều hoặc giờ cụ thể).
+Chọn thiết bị cần mượn thêm và dịch vụ đi kèm (nước suối, trà, bánh, lau dọn…).
+Hệ thống lưu yêu cầu với trạng thái ban đầu là PENDING.
+Admin phê duyệt:
+Xem danh sách yêu cầu đặt phòng.
+Xác nhận hoặc từ chối (từ chối nếu xung đột lịch).
+Phân công nhân viên hỗ trợ cho lịch họp đã duyệt.
+3.4. Phân hệ Xác nhận & Cập nhật trạng thái
+Nhân viên hỗ trợ:
+Xem danh sách cuộc họp được phân công.
+Cập nhật trạng thái chuẩn bị (Preparing, Ready, Thiếu thiết bị).
+Nhân viên (Employee): Xem lịch họp của mình và trạng thái chuẩn bị phòng.
+
+4. Yêu cầu kỹ thuật bắt buộc
+Sinh viên cần đảm bảo:
+Sử dụng: Java Core (OOP) + JDBC kết nối MySQL.
+Áp dụng kiến trúc phân tầng rõ ràng:
+Model: Các thực thể (User, Room, Equipment, Booking, Service…).
+DAO: Các lớp tương tác với cơ sở dữ liệu.
+Service: Xử lý logic nghiệp vụ.
+Presentation: Giao diện điều khiển (Menu Console).
+Util: Các lớp tiện ích chung (kết nối DB, hash mật khẩu, validation).
+
+5. Không gian phát triển nâng cao (Không bắt buộc)
+Sinh viên có thể chọn 2 hoặc nhiều hơn các tính năng dưới đây (hoặc tự đề xuất tính năng khác).
+Tính năng 1: Hệ thống gửi thông báo (thông báo console, ghi log…)
+Hệ thống tự động gửi thông báo (console, ghi log) đến nhân viên khi lịch họp được xác nhận, nhắc lịch sắp diễn ra, hoặc thông báo trạng thái chuẩn bị phòng.
+Tính năng 2: Quản lý chi phí & Xuất báo cáo
+Ghi nhận các dịch vụ phát sinh kèm đơn giá.
+Cuối tháng, xuất báo cáo chi phí theo phòng ban ra với tổng số cuộc họp, tổng chi phí dịch vụ, danh sách booking chi tiết.
+Tính năng 3: Đánh giá chất lượng sau cuộc họp
+Sau cuộc họp, nhân viên đánh giá (điểm 1–5, nhận xét) về phòng, thiết bị, thái độ phục vụ.
+Admin xem tổng hợp đánh giá (trung bình điểm, danh sách phản hồi) và xuất ra file.
+Tính năng 4: Phân tích dữ liệu sử dụng phòng họp
+Thống kê tần suất sử dụng phòng theo giờ, theo ngày trong tháng.
+Xác định phòng được sử dụng nhiều nhất và ít nhất.
+Hiển thị kết quả trên console dưới dạng bảng văn bản đơn giản.
+Tính năng 5: Tích hợp lịch cá nhân & phát hiện xung đột
+Nhân viên nhập các khung giờ bận (lịch cá nhân).
+Khi đặt phòng, hệ thống tự động kiểm tra xung đột với lịch cá nhân và cảnh báo trước khi tạo booking.
+
+6. Yêu cầu phi chức năng (Non-Functional Requirements)
+6.1. Tương tác qua console
+Menu phân theo vai trò sau đăng nhập, hiển thị rõ ràng các lựa chọn.
+Hướng dẫn nhập liệu cụ thể, thông báo kết quả hoặc lỗi dễ hiểu, không thoát đột ngột.
+6.2. Validation
+Kiểm tra hợp lệ tất cả các trường nhập: không để trống, đúng định dạng (ngày giờ, số điện thoại, email…).
+Không cho phép đặt phòng với thời gian bắt đầu nhỏ hơn thời gian hiện tại; không đặt trùng thời gian trên cùng phòng; kiểm tra sức chứa phòng so với số người tham gia dự kiến.
+6.3. Bảo mật cơ bản
+Mật khẩu phải được mã hóa (hash) trước khi lưu vào CSDL.
+Kiểm soát quyền truy cập: nhân viên chỉ xem được booking của mình; nhân viên hỗ trợ chỉ xem booking được phân công; admin có quyền xem tất cả.
+6.4. Xử lý ngoại lệ
+Bắt và xử lý các ngoại lệ (lỗi kết nối DB, lỗi định dạng dữ liệu, lỗi nhập liệu).
+Không để chương trình crash đột ngột; luôn có thông báo lỗi thân thiện và quay lại menu chính.
+6.5. Hiệu năng cơ bản
+Hệ thống hoạt động ổn định với dữ liệu trung bình (vài nghìn bản ghi).
+
+7. Tiêu chí chấm điểm
+Tiêu chí
+Điểm
+Phần bắt buộc (60 điểm) – Đúng chức năng, không lỗi nghiêm trọng, CRUD hoạt động ổn định, JDBC kết nối & xử lý đúng
+60
+Phần nâng cao (40 điểm) – Có thêm tính năng mở rộng, logic hợp lý, thiết kế tốt (code sạch, dễ hiểu)
+40
+Tổng
+100
+
+
