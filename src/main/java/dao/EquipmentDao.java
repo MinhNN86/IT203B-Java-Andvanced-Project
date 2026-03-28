@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 
 public class EquipmentDao extends BaseDao {
+    /**
+     * Lấy tất cả thiết bị
+     * @return Danh sách tất cả Equipment
+     */
     public List<Equipment> findAll() {
         String sql = "SELECT * FROM equipments ORDER BY equipment_id";
         List<Equipment> equipments = new ArrayList<>();
@@ -26,6 +30,11 @@ public class EquipmentDao extends BaseDao {
         return equipments;
     }
 
+    /**
+     * Tìm thiết bị theo ID
+     * @param equipmentId ID của thiết bị cần tìm
+     * @return Optional chứa Equipment nếu tìm thấy, rỗng nếu không
+     */
     public Optional<Equipment> findById(int equipmentId) {
         String sql = "SELECT * FROM equipments WHERE equipment_id = ?";
         try (var connection = getConnection();
@@ -42,6 +51,11 @@ public class EquipmentDao extends BaseDao {
         return Optional.empty();
     }
 
+    /**
+     * Tạo thiết bị mới
+     * @param equipment Thông tin thiết bị cần tạo
+     * @return true nếu tạo thành công, false nếu không
+     */
     public boolean create(Equipment equipment) {
         String sql = "INSERT INTO equipments(equipment_name, total_quantity, available_quantity, status) VALUES (?, ?, ?, ?)";
         try (var connection = getConnection();
@@ -56,6 +70,11 @@ public class EquipmentDao extends BaseDao {
         }
     }
 
+    /**
+     * Cập nhật thông tin thiết bị
+     * @param equipment Thông tin thiết bị cần cập nhật
+     * @return true nếu cập nhật thành công, false nếu không
+     */
     public boolean update(Equipment equipment) {
         String sql = "UPDATE equipments SET equipment_name = ?, total_quantity = ?, available_quantity = ?, status = ? WHERE equipment_id = ?";
         try (var connection = getConnection();
@@ -71,6 +90,11 @@ public class EquipmentDao extends BaseDao {
         }
     }
 
+    /**
+     * Xóa thiết bị
+     * @param equipmentId ID của thiết bị cần xóa
+     * @return true nếu xóa thành công, false nếu không
+     */
     public boolean delete(int equipmentId) {
         String sql = "DELETE FROM equipments WHERE equipment_id = ?";
         try (var connection = getConnection();
@@ -82,6 +106,13 @@ public class EquipmentDao extends BaseDao {
         }
     }
 
+    /**
+     * Giữ chỗ thiết bị cho booking (trong transaction)
+     * @param connection Kết nối database
+     * @param equipmentRequests Map của equipment_id -> quantity cần đặt
+     * @throws SQLException nếu có lỗi database
+     * @throws IllegalArgumentException nếu thiết bị không tồn tại, không ACTIVE, hoặc không đủ số lượng
+     */
     public void reserveForBooking(Connection connection, Map<Integer, Integer> equipmentRequests) throws SQLException {
         for (Map.Entry<Integer, Integer> entry : equipmentRequests.entrySet()) {
             int equipmentId = entry.getKey();
@@ -97,12 +128,10 @@ public class EquipmentDao extends BaseDao {
                     String status = resultSet.getString("status");
                     int available = resultSet.getInt("available_quantity");
                     if (!"ACTIVE".equalsIgnoreCase(status)) {
-                        throw new IllegalArgumentException(
-                                "Thiet bi id = " + equipmentId + " khong o trang thai ACTIVE.");
+                        throw new IllegalArgumentException("Thiet bi id = " + equipmentId + " khong o trang thai ACTIVE.");
                     }
                     if (requiredQty > available) {
-                        throw new IllegalArgumentException(
-                                "Thiet bi id = " + equipmentId + " khong du so luong kha dung.");
+                        throw new IllegalArgumentException("Thiet bi id = " + equipmentId + " khong du so luong kha dung.");
                     }
                 }
             }
@@ -116,6 +145,12 @@ public class EquipmentDao extends BaseDao {
         }
     }
 
+    /**
+     * Giải phóng thiết bị khi booking bị hủy/từ chối (trong transaction)
+     * @param connection Kết nối database
+     * @param equipmentRequests Map của equipment_id -> quantity cần giải phóng
+     * @throws SQLException nếu có lỗi database
+     */
     public void releaseForBooking(Connection connection, Map<Integer, Integer> equipmentRequests) throws SQLException {
         for (Map.Entry<Integer, Integer> entry : equipmentRequests.entrySet()) {
             String updateSql = "UPDATE equipments SET available_quantity = LEAST(total_quantity, available_quantity + ?) WHERE equipment_id = ?";
@@ -127,6 +162,11 @@ public class EquipmentDao extends BaseDao {
         }
     }
 
+    /**
+     * Chuyển đổi ResultSet sang đối tượng Equipment
+     * @param resultSet ResultSet từ database
+     * @return Đối tượng Equipment
+     */
     private Equipment mapEquipment(ResultSet resultSet) throws SQLException {
         Equipment equipment = new Equipment();
         equipment.setEquipmentId(resultSet.getInt("equipment_id"));

@@ -14,25 +14,27 @@ import java.util.Optional;
 public class BookingDao extends BaseDao {
     private final EquipmentDao equipmentDao = new EquipmentDao();
 
+    /**
+     * Tạo booking mới với trạng thái PENDING và chi tiết thiết bị/dịch vụ
+     * @param booking Thông tin booking cơ bản
+     * @param equipmentRequests Map của equipment_id -> quantity
+     * @param serviceRequests Map của service_id -> quantity
+     * @return ID của booking vừa tạo
+     */
     public int createPendingBookingWithDetails(Booking booking,
             Map<Integer, Integer> equipmentRequests,
             Map<Integer, Integer> serviceRequests) {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try {
-                if (hasRoomConflict(connection, booking.getRoomId(), booking.getStartTime(), booking.getEndTime(),
-                        null)) {
+                if (hasRoomConflict(connection, booking.getRoomId(), booking.getStartTime(), booking.getEndTime(), null)) {
                     throw new IllegalArgumentException("Phong da co lich trung trong khung gio nay.");
                 }
 
-                String bookingSql = """
-                        INSERT INTO bookings(employee_id, room_id, start_time, end_time, booking_status, prep_status)
-                        VALUES (?, ?, ?, ?, 'PENDING', 'PENDING')
-                        """;
+                String bookingSql = "INSERT INTO bookings(employee_id, room_id, start_time, end_time, booking_status, prep_status) VALUES (?, ?, ?, ?, 'PENDING', 'PENDING')";
 
                 int bookingId;
-                try (PreparedStatement statement = connection.prepareStatement(bookingSql,
-                        Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement statement = connection.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
                     statement.setInt(1, booking.getEmployeeId());
                     statement.setInt(2, booking.getRoomId());
                     statement.setTimestamp(3, Timestamp.valueOf(booking.getStartTime()));
@@ -64,6 +66,11 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Tìm booking theo ID
+     * @param bookingId ID của booking cần tìm
+     * @return Optional chứa Booking nếu tìm thấy, rỗng nếu không
+     */
     public Optional<Booking> findById(int bookingId) {
         String sql = "SELECT * FROM bookings WHERE booking_id = ?";
         try (Connection connection = getConnection();
@@ -80,31 +87,48 @@ public class BookingDao extends BaseDao {
         return Optional.empty();
     }
 
+    /**
+     * Lấy danh sách booking đang chờ duyệt
+     * @return Danh sách BookingDetail có trạng thái PENDING
+     */
     public List<BookingDetail> findPendingBookings() {
-        String condition = "WHERE b.booking_status = 'PENDING'";
-        return findBookingDetails(condition);
+        return findBookingDetails("WHERE b.booking_status = 'PENDING'");
     }
 
+    /**
+     * Lấy tất cả booking
+     * @return Danh sách tất cả BookingDetail
+     */
     public List<BookingDetail> findAllBookings() {
         return findBookingDetails("");
     }
 
+    /**
+     * Lấy danh sách booking của một nhân viên
+     * @param employeeId ID của nhân viên
+     * @return Danh sách BookingDetail của nhân viên
+     */
     public List<BookingDetail> findByEmployee(int employeeId) {
-        String condition = "WHERE b.employee_id = " + employeeId;
-        return findBookingDetails(condition);
+        return findBookingDetails("WHERE b.employee_id = " + employeeId);
     }
 
+    /**
+     * Lấy danh sách booking được giao cho một support staff
+     * @param supportStaffId ID của support staff
+     * @return Danh sách BookingDetail được giao cho support staff
+     */
     public List<BookingDetail> findBySupportStaff(int supportStaffId) {
-        String condition = "WHERE b.support_staff_id = " + supportStaffId;
-        return findBookingDetails(condition);
+        return findBookingDetails("WHERE b.support_staff_id = " + supportStaffId);
     }
 
+    /**
+     * Duyệt booking đang chờ
+     * @param bookingId ID của booking cần duyệt
+     * @param supportStaffId ID của support staff được giao
+     * @return true nếu duyệt thành công, false nếu không
+     */
     public boolean approvePendingBooking(int bookingId, int supportStaffId) {
-        String sql = """
-                UPDATE bookings
-                SET booking_status = 'APPROVED', support_staff_id = ?, prep_status = 'PREPARING'
-                WHERE booking_id = ? AND booking_status = 'PENDING'
-                """;
+        String sql = "UPDATE bookings SET booking_status = 'APPROVED', support_staff_id = ?, prep_status = 'PREPARING' WHERE booking_id = ? AND booking_status = 'PENDING'";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, supportStaffId);
@@ -115,6 +139,11 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Từ chối booking đang chờ và giải phóng thiết bị
+     * @param bookingId ID của booking cần từ chối
+     * @return true nếu từ chối thành công
+     */
     public boolean rejectPendingBooking(int bookingId) {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
@@ -145,6 +174,12 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Hủy booking đang chờ bởi nhân viên
+     * @param bookingId ID của booking cần hủy
+     * @param employeeId ID của nhân viên yêu cầu hủy
+     * @return true nếu hủy thành công
+     */
     public boolean cancelPendingBooking(int bookingId, int employeeId) {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
@@ -191,14 +226,15 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Cập nhật trạng thái chuẩn bị của booking
+     * @param bookingId ID của booking
+     * @param supportStaffId ID của support staff
+     * @param prepStatus Trạng thái mới (PREPARING, READY, COMPLETED)
+     * @return true nếu cập nhật thành công
+     */
     public boolean updatePreparationStatus(int bookingId, int supportStaffId, String prepStatus) {
-        String sql = """
-                UPDATE bookings
-                SET prep_status = ?
-                WHERE booking_id = ?
-                  AND support_staff_id = ?
-                  AND booking_status = 'APPROVED'
-                """;
+        String sql = "UPDATE bookings SET prep_status = ? WHERE booking_id = ? AND support_staff_id = ? AND booking_status = 'APPROVED'";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, prepStatus);
@@ -210,6 +246,12 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Khóa booking để kiểm tra trạng thái PENDING
+     * @param connection Kết nối database
+     * @param bookingId ID của booking
+     * @return Booking đã khóa
+     */
     private Booking lockPendingBooking(Connection connection, int bookingId) throws SQLException {
         String lockSql = "SELECT * FROM bookings WHERE booking_id = ? FOR UPDATE";
         try (PreparedStatement statement = connection.prepareStatement(lockSql)) {
@@ -227,6 +269,12 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Lấy danh sách thiết bị đã đặt cho booking
+     * @param connection Kết nối database
+     * @param bookingId ID của booking
+     * @return Map của equipment_id -> quantity
+     */
     private Map<Integer, Integer> getEquipmentRequests(Connection connection, int bookingId) throws SQLException {
         String sql = "SELECT equipment_id, quantity FROM booking_equipments WHERE booking_id = ?";
         Map<Integer, Integer> requests = new HashMap<>();
@@ -241,6 +289,12 @@ public class BookingDao extends BaseDao {
         return requests;
     }
 
+    /**
+     * Thêm chi tiết thiết bị cho booking
+     * @param connection Kết nối database
+     * @param bookingId ID của booking
+     * @param equipmentRequests Map của equipment_id -> quantity
+     */
     private void insertBookingEquipments(Connection connection, int bookingId, Map<Integer, Integer> equipmentRequests)
             throws SQLException {
         if (equipmentRequests.isEmpty()) {
@@ -259,18 +313,19 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Thêm chi tiết dịch vụ cho booking
+     * @param connection Kết nối database
+     * @param bookingId ID của booking
+     * @param serviceRequests Map của service_id -> quantity
+     */
     private void insertBookingServices(Connection connection, int bookingId, Map<Integer, Integer> serviceRequests)
             throws SQLException {
         if (serviceRequests.isEmpty()) {
             return;
         }
 
-        String sql = """
-                INSERT INTO booking_services(booking_id, service_id, quantity, price_at_booking)
-                SELECT ?, s.service_id, ?, s.price
-                FROM services s
-                WHERE s.service_id = ?
-                """;
+        String sql = "INSERT INTO booking_services(booking_id, service_id, quantity, price_at_booking) SELECT ?, s.service_id, ?, s.price FROM services s WHERE s.service_id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             for (Map.Entry<Integer, Integer> entry : serviceRequests.entrySet()) {
@@ -283,19 +338,18 @@ public class BookingDao extends BaseDao {
         }
     }
 
-    private boolean hasRoomConflict(Connection connection,
-            int roomId,
-            LocalDateTime startTime,
-            LocalDateTime endTime,
+    /**
+     * Kiểm tra xem phòng có bị trùng lịch không
+     * @param connection Kết nối database
+     * @param roomId ID của phòng
+     * @param startTime Thời gian bắt đầu
+     * @param endTime Thời gian kết thúc
+     * @param excludeBookingId ID của booking cần loại khỏi kiểm tra (null nếu không)
+     * @return true nếu có trùng lịch, false nếu không
+     */
+    private boolean hasRoomConflict(Connection connection, int roomId, LocalDateTime startTime, LocalDateTime endTime,
             Integer excludeBookingId) throws SQLException {
-        String sql = """
-                SELECT COUNT(*)
-                FROM bookings
-                WHERE room_id = ?
-                  AND booking_status IN ('PENDING', 'APPROVED')
-                  AND (? < end_time AND ? > start_time)
-                  AND (? IS NULL OR booking_id <> ?)
-                """;
+        String sql = "SELECT COUNT(*) FROM bookings WHERE room_id = ? AND booking_status IN ('PENDING', 'APPROVED') AND (? < end_time AND ? > start_time) AND (? IS NULL OR booking_id <> ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, roomId);
@@ -316,40 +370,13 @@ public class BookingDao extends BaseDao {
         }
     }
 
+    /**
+     * Tìm danh sách booking chi tiết theo điều kiện
+     * @param whereClause Điều kiện WHERE (có thể rỗng)
+     * @return Danh sách BookingDetail
+     */
     private List<BookingDetail> findBookingDetails(String whereClause) {
-        String sql = """
-                SELECT b.booking_id,
-                	   r.room_name,
-                	   u.full_name AS employee_name,
-                	   b.start_time,
-                	   b.end_time,
-                	   b.booking_status,
-                	   b.prep_status,
-                	   COALESCE(ss.full_name, '-') AS support_staff_name,
-                	   COALESCE(eq.equipment_summary, '-') AS equipment_summary,
-                	   COALESCE(sv.service_summary, '-') AS service_summary
-                FROM bookings b
-                JOIN rooms r ON r.room_id = b.room_id
-                JOIN users u ON u.user_id = b.employee_id
-                LEFT JOIN users ss ON ss.user_id = b.support_staff_id
-                LEFT JOIN (
-                	SELECT be.booking_id,
-                		   GROUP_CONCAT(CONCAT(e.equipment_name, ' x', be.quantity) ORDER BY e.equipment_name SEPARATOR ', ') AS equipment_summary
-                	FROM booking_equipments be
-                	JOIN equipments e ON e.equipment_id = be.equipment_id
-                	GROUP BY be.booking_id
-                ) eq ON eq.booking_id = b.booking_id
-                LEFT JOIN (
-                	SELECT bs.booking_id,
-                		   GROUP_CONCAT(CONCAT(s.service_name, ' x', bs.quantity) ORDER BY s.service_name SEPARATOR ', ') AS service_summary
-                	FROM booking_services bs
-                	JOIN services s ON s.service_id = bs.service_id
-                	GROUP BY bs.booking_id
-                ) sv ON sv.booking_id = b.booking_id
-                %s
-                ORDER BY b.start_time DESC
-                """
-                .formatted(whereClause);
+        String sql = "SELECT b.booking_id, r.room_name, u.full_name AS employee_name, b.start_time, b.end_time, b.booking_status, b.prep_status, COALESCE(ss.full_name, '-') AS support_staff_name, COALESCE(eq.equipment_summary, '-') AS equipment_summary, COALESCE(sv.service_summary, '-') AS service_summary FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN users u ON u.user_id = b.employee_id LEFT JOIN users ss ON ss.user_id = b.support_staff_id LEFT JOIN (SELECT be.booking_id, GROUP_CONCAT(CONCAT(e.equipment_name, ' x', be.quantity) ORDER BY e.equipment_name SEPARATOR ', ') AS equipment_summary FROM booking_equipments be JOIN equipments e ON e.equipment_id = be.equipment_id GROUP BY be.booking_id) eq ON eq.booking_id = b.booking_id LEFT JOIN (SELECT bs.booking_id, GROUP_CONCAT(CONCAT(s.service_name, ' x', bs.quantity) ORDER BY s.service_name SEPARATOR ', ') AS service_summary FROM booking_services bs JOIN services s ON s.service_id = bs.service_id GROUP BY bs.booking_id) sv ON sv.booking_id = b.booking_id %s ORDER BY b.start_time DESC".formatted(whereClause);
 
         List<BookingDetail> details = new ArrayList<>();
         try (Connection connection = getConnection();
@@ -364,6 +391,11 @@ public class BookingDao extends BaseDao {
         return details;
     }
 
+    /**
+     * Chuyển đổi ResultSet sang đối tượng Booking
+     * @param resultSet ResultSet từ database
+     * @return Đối tượng Booking
+     */
     private Booking mapBooking(ResultSet resultSet) throws SQLException {
         Booking booking = new Booking();
         booking.setBookingId(resultSet.getInt("booking_id"));
@@ -386,6 +418,11 @@ public class BookingDao extends BaseDao {
         return booking;
     }
 
+    /**
+     * Chuyển đổi ResultSet sang đối tượng BookingDetail
+     * @param resultSet ResultSet từ database
+     * @return Đối tượng BookingDetail
+     */
     private BookingDetail mapBookingDetail(ResultSet resultSet) throws SQLException {
         BookingDetail detail = new BookingDetail();
         detail.setBookingId(resultSet.getInt("booking_id"));

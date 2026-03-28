@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDao extends BaseDao {
+    /**
+     * Tìm user theo username
+     * @param username Username cần tìm
+     * @return Optional chứa User nếu tìm thấy, rỗng nếu không
+     */
     public Optional<User> findByUsername(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (var connection = getConnection();
@@ -27,6 +32,11 @@ public class UserDao extends BaseDao {
         return Optional.empty();
     }
 
+    /**
+     * Tìm user theo ID
+     * @param userId ID của user cần tìm
+     * @return Optional chứa User nếu tìm thấy, rỗng nếu không
+     */
     public Optional<User> findById(int userId) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
         try (var connection = getConnection();
@@ -43,6 +53,11 @@ public class UserDao extends BaseDao {
         return Optional.empty();
     }
 
+    /**
+     * Tạo user mới
+     * @param user Thông tin user cần tạo
+     * @return true nếu tạo thành công, false nếu không
+     */
     public boolean createUser(User user) {
         String sql = "INSERT INTO users(username, password, role, full_name, email, phone, department) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (var connection = getConnection();
@@ -71,6 +86,11 @@ public class UserDao extends BaseDao {
         }
     }
 
+    /**
+     * Cập nhật thông tin profile của user
+     * @param user Thông tin user cần cập nhật
+     * @return true nếu cập nhật thành công, false nếu không
+     */
     public boolean updateProfile(User user) {
         String sql = "UPDATE users SET full_name = ?, email = ?, phone = ?, department = ? WHERE user_id = ?";
         try (var connection = getConnection();
@@ -86,6 +106,11 @@ public class UserDao extends BaseDao {
         }
     }
 
+    /**
+     * Lấy danh sách user theo role
+     * @param role Role cần tìm (EMPLOYEE, SUPPORT_STAFF, ADMIN)
+     * @return Danh sách User có role tương ứng
+     */
     public List<User> findByRole(String role) {
         String sql = "SELECT * FROM users WHERE role = ? ORDER BY full_name";
         List<User> users = new ArrayList<>();
@@ -103,15 +128,18 @@ public class UserDao extends BaseDao {
         return users;
     }
 
+    /**
+     * Lấy tất cả user
+     * @return Danh sách tất cả User
+     */
     public List<User> getAllUsers() {
         String sql = "SELECT * FROM users ORDER BY full_name";
         List<User> users = new ArrayList<>();
         try (var connection = getConnection();
-                var statement = connection.prepareStatement(sql)) {
-            try (var resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    users.add(mapUser(resultSet));
-                }
+                var statement = connection.prepareStatement(sql);
+                var resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                users.add(mapUser(resultSet));
             }
         } catch (SQLException ex) {
             throw new RuntimeException("Khong the lay danh sach tat ca user.", ex);
@@ -119,6 +147,11 @@ public class UserDao extends BaseDao {
         return users;
     }
 
+    /**
+     * Cập nhật thông tin user
+     * @param user Thông tin user cần cập nhật
+     * @return true nếu cập nhật thành công, false nếu không
+     */
     public boolean updateUser(User user) {
         String sql = "UPDATE users SET username = ?, password = ?, role = ?, full_name = ?, email = ?, phone = ?, department = ? WHERE user_id = ?";
         try (var connection = getConnection();
@@ -137,6 +170,11 @@ public class UserDao extends BaseDao {
         }
     }
 
+    /**
+     * Xóa user
+     * @param userId ID của user cần xóa
+     * @return true nếu xóa thành công, false nếu không
+     */
     public boolean deleteUser(int userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
         try (var connection = getConnection();
@@ -148,6 +186,11 @@ public class UserDao extends BaseDao {
         }
     }
 
+    /**
+     * Chuyển đổi ResultSet sang đối tượng User
+     * @param resultSet ResultSet từ database
+     * @return Đối tượng User
+     */
     private User mapUser(ResultSet resultSet) throws SQLException {
         User user = new User();
         user.setUserId(resultSet.getInt("user_id"));
@@ -166,6 +209,11 @@ public class UserDao extends BaseDao {
         return user;
     }
 
+    /**
+     * Chuẩn hóa chuỗi: null nếu rỗng, ngược lại trim
+     * @param value Chuỗi cần chuẩn hóa
+     * @return Chuỗi đã chuẩn hóa hoặc null
+     */
     private String normalizeBlank(String value) {
         if (value == null || value.isBlank()) {
             return null;

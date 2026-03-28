@@ -44,8 +44,8 @@ public class AuthService {
             String email,
             String phone,
             String department) {
-        if (!"SUPPORT_STAFF".equals(role) && !"ADMIN".equals(role)) {
-            throw new IllegalArgumentException("Admin chi duoc tao SUPPORT_STAFF hoac ADMIN.");
+        if (!"EMPLOYEE".equals(role) && !"SUPPORT_STAFF".equals(role) && !"ADMIN".equals(role)) {
+            throw new IllegalArgumentException("Role khong hop le. Phai la EMPLOYEE, SUPPORT_STAFF, hoac ADMIN.");
         }
 
         validateCredentials(username, plainPassword);

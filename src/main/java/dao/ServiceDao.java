@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class ServiceDao extends BaseDao {
+    /**
+     * Lấy tất cả dịch vụ
+     * @return Danh sách tất cả Service
+     */
     public List<Service> findAll() {
         String sql = "SELECT * FROM services ORDER BY service_id";
         List<Service> services = new ArrayList<>();
@@ -24,6 +28,11 @@ public class ServiceDao extends BaseDao {
         return services;
     }
 
+    /**
+     * Tìm dịch vụ theo ID
+     * @param serviceId ID của dịch vụ cần tìm
+     * @return Optional chứa Service nếu tìm thấy, rỗng nếu không
+     */
     public Optional<Service> findById(int serviceId) {
         String sql = "SELECT * FROM services WHERE service_id = ?";
         try (var connection = getConnection();
@@ -40,6 +49,11 @@ public class ServiceDao extends BaseDao {
         return Optional.empty();
     }
 
+    /**
+     * Tạo dịch vụ mới
+     * @param service Thông tin dịch vụ cần tạo
+     * @return true nếu tạo thành công, false nếu không
+     */
     public boolean create(Service service) {
         String sql = "INSERT INTO services(service_name, price, unit) VALUES (?, ?, ?)";
         try (var connection = getConnection();
@@ -53,6 +67,11 @@ public class ServiceDao extends BaseDao {
         }
     }
 
+    /**
+     * Cập nhật thông tin dịch vụ
+     * @param service Thông tin dịch vụ cần cập nhật
+     * @return true nếu cập nhật thành công, false nếu không
+     */
     public boolean update(Service service) {
         String sql = "UPDATE services SET service_name = ?, price = ?, unit = ? WHERE service_id = ?";
         try (var connection = getConnection();
@@ -67,6 +86,11 @@ public class ServiceDao extends BaseDao {
         }
     }
 
+    /**
+     * Xóa dịch vụ
+     * @param serviceId ID của dịch vụ cần xóa
+     * @return true nếu xóa thành công, false nếu không
+     */
     public boolean delete(int serviceId) {
         String sql = "DELETE FROM services WHERE service_id = ?";
         try (var connection = getConnection();
@@ -78,6 +102,11 @@ public class ServiceDao extends BaseDao {
         }
     }
 
+    /**
+     * Chuyển đổi ResultSet sang đối tượng Service
+     * @param resultSet ResultSet từ database
+     * @return Đối tượng Service
+     */
     private Service mapService(ResultSet resultSet) throws SQLException {
         Service service = new Service();
         service.setServiceId(resultSet.getInt("service_id"));
@@ -87,6 +116,11 @@ public class ServiceDao extends BaseDao {
         return service;
     }
 
+    /**
+     * Chuẩn hóa chuỗi: null nếu rỗng, ngược lại trim
+     * @param value Chuỗi cần chuẩn hóa
+     * @return Chuỗi đã chuẩn hóa hoặc null
+     */
     private String normalizeBlank(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }

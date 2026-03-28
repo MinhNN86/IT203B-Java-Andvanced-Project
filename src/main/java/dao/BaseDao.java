@@ -7,6 +7,6 @@ import java.sql.SQLException;
 
 public abstract class BaseDao {
     protected Connection getConnection() throws SQLException {
-        return DBConnection.getConnection();
+        return DBConnection.getInstance().getConnection();
     }
 }

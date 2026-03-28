@@ -4,9 +4,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-/**
- * Tiện ích mã hóa mật khẩu đơn giản và dễ hiểu
- */
 public class SecurityUtil {
     
     // Không cho phép tạo instance

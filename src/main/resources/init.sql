@@ -78,9 +78,6 @@ CREATE TABLE booking_services (
     FOREIGN KEY (service_id) REFERENCES services(service_id)
 );
 
--- ==========================================================
--- CÁC BẢNG DÀNH CHO KHÔNG GIAN PHÁT TRIỂN NÂNG CAO (Tuỳ chọn)
--- ==========================================================
 
 -- 8. Bảng Đánh giá (Feedbacks)
 CREATE TABLE feedbacks (
