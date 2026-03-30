@@ -1,6 +1,7 @@
 package service;
 
 import dao.UserDao;
+import dao.impl.UserDaoImpl;
 import model.User;
 import util.InputValidator;
 import util.SecurityUtil;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class AuthService {
-    private final UserDao userDao = new UserDao();
+    private final UserDao userDao = new UserDaoImpl();
 
     public User registerEmployee(String username,
             String plainPassword,

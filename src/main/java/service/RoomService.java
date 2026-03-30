@@ -1,13 +1,14 @@
 package service;
 
 import dao.RoomDao;
+import dao.impl.RoomDaoImpl;
 import model.Room;
 
 import java.util.List;
 import java.util.Optional;
 
 public class RoomService {
-    private final RoomDao roomDao = new RoomDao();
+    private final RoomDao roomDao = new RoomDaoImpl();
 
     public List<Room> getAllRooms() {
         return roomDao.findAll();

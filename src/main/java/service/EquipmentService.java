@@ -1,13 +1,14 @@
 package service;
 
 import dao.EquipmentDao;
+import dao.impl.EquipmentDaoImpl;
 import model.Equipment;
 
 import java.util.List;
 import java.util.Optional;
 
 public class EquipmentService {
-    private final EquipmentDao equipmentDao = new EquipmentDao();
+    private final EquipmentDao equipmentDao = new EquipmentDaoImpl();
 
     public List<Equipment> getAllEquipments() {
         return equipmentDao.findAll();

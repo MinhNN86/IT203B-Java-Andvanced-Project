@@ -3,6 +3,9 @@ package service;
 import dao.BookingDao;
 import dao.RoomDao;
 import dao.ServiceDao;
+import dao.impl.BookingDaoImpl;
+import dao.impl.RoomDaoImpl;
+import dao.impl.ServiceDaoImpl;
 import model.Booking;
 import model.BookingDetail;
 import model.Room;
@@ -15,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BookingService {
-    private final BookingDao bookingDao = new BookingDao();
-    private final RoomDao roomDao = new RoomDao();
-    private final ServiceDao serviceDao = new ServiceDao();
+    private final BookingDao bookingDao = new BookingDaoImpl();
+    private final RoomDao roomDao = new RoomDaoImpl();
+    private final ServiceDao serviceDao = new ServiceDaoImpl();
 
     public int createBooking(int employeeId,
             int roomId,
