@@ -69,7 +69,6 @@ public class EmployeeView {
         System.out.println("Ho ten  : " + currentUser.getFullName());
         System.out.println("Email   : " + valueOrDash(currentUser.getEmail()));
         System.out.println("Phone   : " + valueOrDash(currentUser.getPhone()));
-        System.out.println("Phong ban: " + valueOrDash(currentUser.getDepartment()));
 
         int choice = InputValidator.promptIntInRange(scanner, "Cap nhat ho so? (1:Co, 0:Khong): ", 0, 1);
         if (choice == 0) {
@@ -79,9 +78,8 @@ public class EmployeeView {
         String fullName = InputValidator.promptRequired(scanner, "Ho ten moi: ");
         String email = InputValidator.promptOptional(scanner, "Email moi (co the bo trong): ");
         String phone = InputValidator.promptOptional(scanner, "Phone moi (co the bo trong): ");
-        String department = InputValidator.promptOptional(scanner, "Phong ban moi (co the bo trong): ");
 
-        User updated = authService.updateProfile(currentUser, fullName, email, phone, department);
+        User updated = authService.updateProfile(currentUser, fullName, email, phone);
         System.out.println("Cap nhat ho so thanh cong.");
         return updated;
     }

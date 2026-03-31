@@ -280,9 +280,8 @@ public class AdminView {
                     String fullName = InputValidator.promptRequired(scanner, "Ho ten: ");
                     String email = InputValidator.promptOptional(scanner, "Email: ");
                     String phone = InputValidator.promptOptional(scanner, "Phone: ");
-                    String department = InputValidator.promptOptional(scanner, "Phong ban: ");
 
-                    authService.createAccountByAdmin(role, username, password, fullName, email, phone, department);
+                    authService.createAccountByAdmin(role, username, password, fullName, email, phone);
                     System.out.println("Tao user thanh cong.");
                 }
                 case 3 -> {
@@ -333,12 +332,7 @@ public class AdminView {
                         phone = current.getPhone();
                     }
 
-                    String department = InputValidator.promptOptional(scanner, "Phong ban moi (bo trong de giu): ");
-                    if (department.isBlank()) {
-                        department = current.getDepartment();
-                    }
-
-                    authService.updateUserByAdmin(userId, username, password, role, fullName, email, phone, department);
+                    authService.updateUserByAdmin(userId, username, password, role, fullName, email, phone);
                     System.out.println("Cap nhat user thanh cong.");
                 }
                 case 4 -> {
@@ -405,9 +399,8 @@ public class AdminView {
         String fullName = InputValidator.promptRequired(scanner, "Ho ten: ");
         String email = InputValidator.promptOptional(scanner, "Email: ");
         String phone = InputValidator.promptOptional(scanner, "Phone: ");
-        String department = InputValidator.promptOptional(scanner, "Phong ban: ");
 
-        authService.createAccountByAdmin(role, username, password, fullName, email, phone, department);
+        authService.createAccountByAdmin(role, username, password, fullName, email, phone);
         System.out.println("Tao tai khoan " + role + " thanh cong.");
     }
 

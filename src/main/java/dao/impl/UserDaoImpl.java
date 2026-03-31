@@ -69,7 +69,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
      */
     @Override
     public boolean createUser(User user) {
-        String sql = "INSERT INTO users(username, password, role, full_name, email, phone, department) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users(username, password, role, full_name, email, phone) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, user.getUsername());
@@ -78,7 +78,6 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             statement.setString(4, user.getFullName());
             statement.setString(5, normalizeBlank(user.getEmail()));
             statement.setString(6, normalizeBlank(user.getPhone()));
-            statement.setString(7, normalizeBlank(user.getDepartment()));
 
             int affected = statement.executeUpdate();
             if (affected == 0) {
@@ -103,14 +102,13 @@ public class UserDaoImpl extends BaseDao implements UserDao {
      */
     @Override
     public boolean updateProfile(User user) {
-        String sql = "UPDATE users SET full_name = ?, email = ?, phone = ?, department = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET full_name = ?, email = ?, phone = ? WHERE user_id = ?";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getFullName());
             statement.setString(2, normalizeBlank(user.getEmail()));
             statement.setString(3, normalizeBlank(user.getPhone()));
-            statement.setString(4, normalizeBlank(user.getDepartment()));
-            statement.setInt(5, user.getUserId());
+            statement.setInt(4, user.getUserId());
             return statement.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new RuntimeException("Khong the cap nhat profile.", ex);
@@ -167,7 +165,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
      */
     @Override
     public boolean updateUser(User user) {
-        String sql = "UPDATE users SET username = ?, password = ?, role = ?, full_name = ?, email = ?, phone = ?, department = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET username = ?, password = ?, role = ?, full_name = ?, email = ?, phone = ? WHERE user_id = ?";
         try (Connection connection = getConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, user.getUsername());
@@ -176,8 +174,7 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             statement.setString(4, user.getFullName());
             statement.setString(5, normalizeBlank(user.getEmail()));
             statement.setString(6, normalizeBlank(user.getPhone()));
-            statement.setString(7, normalizeBlank(user.getDepartment()));
-            statement.setInt(8, user.getUserId());
+            statement.setInt(7, user.getUserId());
             return statement.executeUpdate() > 0;
         } catch (SQLException ex) {
             throw new RuntimeException("Khong the cap nhat user.", ex);
@@ -215,7 +212,6 @@ public class UserDaoImpl extends BaseDao implements UserDao {
         user.setFullName(resultSet.getString("full_name"));
         user.setEmail(resultSet.getString("email"));
         user.setPhone(resultSet.getString("phone"));
-        user.setDepartment(resultSet.getString("department"));
 
         Timestamp createdAt = resultSet.getTimestamp("created_at");
         if (createdAt != null) {

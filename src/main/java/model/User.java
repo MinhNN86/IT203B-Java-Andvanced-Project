@@ -10,7 +10,6 @@ public class User {
     private String fullName;
     private String email;
     private String phone;
-    private String department;
     private LocalDateTime createdAt;
 
     public int getUserId() {
@@ -67,14 +66,6 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     public LocalDateTime getCreatedAt() {

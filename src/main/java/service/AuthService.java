@@ -16,8 +16,7 @@ public class AuthService {
             String plainPassword,
             String fullName,
             String email,
-            String phone,
-            String department) {
+            String phone) {
         validateCredentials(username, plainPassword);
         validateContact(email, phone);
 
@@ -32,7 +31,6 @@ public class AuthService {
         user.setFullName(fullName.trim());
         user.setEmail(email);
         user.setPhone(phone);
-        user.setDepartment(department);
 
         userDao.createUser(user);
         return user;
@@ -43,8 +41,7 @@ public class AuthService {
             String plainPassword,
             String fullName,
             String email,
-            String phone,
-            String department) {
+            String phone) {
         if (!"EMPLOYEE".equals(role) && !"SUPPORT_STAFF".equals(role) && !"ADMIN".equals(role)) {
             throw new IllegalArgumentException("Role khong hop le. Phai la EMPLOYEE, SUPPORT_STAFF, hoac ADMIN.");
         }
@@ -63,7 +60,6 @@ public class AuthService {
         user.setFullName(fullName.trim());
         user.setEmail(email);
         user.setPhone(phone);
-        user.setDepartment(department);
 
         userDao.createUser(user);
         return user;
@@ -85,14 +81,12 @@ public class AuthService {
     public User updateProfile(User currentUser,
             String fullName,
             String email,
-            String phone,
-            String department) {
+            String phone) {
         validateContact(email, phone);
 
         currentUser.setFullName(fullName.trim());
         currentUser.setEmail(email);
         currentUser.setPhone(phone);
-        currentUser.setDepartment(department);
 
         boolean updated = userDao.updateProfile(currentUser);
         if (!updated) {
@@ -120,7 +114,6 @@ public class AuthService {
         admin.setFullName("System Admin");
         admin.setEmail("admin@local");
         admin.setPhone("0000000000");
-        admin.setDepartment("IT");
         userDao.createUser(admin);
 
         System.out.println("[INFO] Da tao tai khoan ADMIN mac dinh: admin / admin123");
@@ -132,8 +125,7 @@ public class AuthService {
             String role,
             String fullName,
             String email,
-            String phone,
-            String department) {
+            String phone) {
         validateRole(role);
         validateCredentials(username, plainPassword);
         validateContact(email, phone);
@@ -154,7 +146,6 @@ public class AuthService {
         existingUser.setFullName(fullName.trim());
         existingUser.setEmail(email);
         existingUser.setPhone(phone);
-        existingUser.setDepartment(department);
 
         boolean updated = userDao.updateUser(existingUser);
         if (!updated) {
