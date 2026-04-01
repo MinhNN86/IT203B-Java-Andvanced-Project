@@ -225,7 +225,7 @@ public class AdminView {
 
             int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 4);
             switch (choice) {
-                case 1 -> bookingService.getAllServices().forEach(System.out::println);
+                case 1 -> printServicesTable(bookingService.getAllServices());
                 case 2 -> {
                     String name = InputValidator.promptRequired(scanner, "Ten dich vu: ");
                     double price = promptDouble("Don gia: ");
@@ -234,6 +234,8 @@ public class AdminView {
                     System.out.println("Them dich vu thanh cong.");
                 }
                 case 3 -> {
+                    System.out.println("\nDanh sach dich vu hien tai:");
+                    printServicesTable(bookingService.getAllServices());
                     int serviceId = InputValidator.promptIntInRange(scanner, "Service ID can cap nhat: ", 1,
                             Integer.MAX_VALUE);
                     List<Service> services = bookingService.getAllServices();
@@ -241,6 +243,8 @@ public class AdminView {
                             .filter(service -> service.getServiceId() == serviceId)
                             .findFirst()
                             .orElseThrow(() -> new IllegalArgumentException("Khong tim thay dich vu."));
+                    System.out.println("\nThong tin dich vu hien tai:");
+                    printServicesTable(List.of(current));
 
                     String name = InputValidator.promptOptional(scanner, "Ten dich vu moi (bo trong de giu): ");
                     if (name.isBlank()) {
@@ -260,6 +264,8 @@ public class AdminView {
                     System.out.println("Cap nhat dich vu thanh cong.");
                 }
                 case 4 -> {
+                    System.out.println("\nDanh sach dich vu hien tai:");
+                    printServicesTable(bookingService.getAllServices());
                     int serviceId = InputValidator.promptIntInRange(scanner, "Service ID can xoa: ", 1,
                             Integer.MAX_VALUE);
                     bookingService.deleteService(serviceId);
@@ -284,10 +290,7 @@ public class AdminView {
 
             int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 4);
             switch (choice) {
-                case 1 -> {
-                    System.out.println("\n--- DANH SACH USER ---");
-                    authService.getAllUsers().forEach(System.out::println);
-                }
+                case 1 -> printUsersTable(authService.getAllUsers());
                 case 2 -> {
                     int roleChoice = InputValidator.promptIntInRange(scanner,
                             "Loai tai khoan (1:SUPPORT_STAFF, 2:ADMIN): ", 1, 2);
@@ -307,13 +310,16 @@ public class AdminView {
                     System.out.println("Tao user thanh cong.");
                 }
                 case 3 -> {
-                    int userId = InputValidator.promptIntInRange(scanner, "User ID can cap nhat: ", 1, Integer.MAX_VALUE);
+                    System.out.println("\nDanh sach user hien tai:");
+                    printUsersTable(authService.getAllUsers());
+                    int userId = InputValidator.promptIntInRange(scanner, "User ID can cap nhat: ", 1,
+                            Integer.MAX_VALUE);
                     User current = authService.getAllUsers().stream()
                             .filter(user -> user.getUserId() == userId)
                             .findFirst()
                             .orElseThrow(() -> new IllegalArgumentException("Khong tim thay user."));
-
-                    System.out.println("User hien tai: " + current);
+                    System.out.println("\nThong tin user hien tai:");
+                    printUsersTable(List.of(current));
 
                     String username = InputValidator.promptOptional(scanner, "Username moi (bo trong de giu): ");
                     if (username.isBlank()) {
@@ -358,12 +364,14 @@ public class AdminView {
                     System.out.println("Cap nhat user thanh cong.");
                 }
                 case 4 -> {
+                    System.out.println("\nDanh sach user hien tai:");
+                    printUsersTable(authService.getAllUsers());
                     int userId = InputValidator.promptIntInRange(scanner, "User ID can xoa: ", 1, Integer.MAX_VALUE);
                     User user = authService.getAllUsers().stream()
                             .filter(u -> u.getUserId() == userId)
                             .findFirst()
                             .orElseThrow(() -> new IllegalArgumentException("Khong tim thay user."));
-                    
+
                     System.out.println("User se xoa: " + user);
                     String confirm = InputValidator.promptOptional(scanner, "Xac nhan xoa? (y/N): ");
                     if (confirm.equalsIgnoreCase("y")) {
@@ -455,7 +463,8 @@ public class AdminView {
 
         String rowFormat = "%-6s %-22s %-10s %-18s %-28s %-8s%n";
         System.out.printf(rowFormat, "ID", "TEN PHONG", "SUC CHUA", "VI TRI", "THIET BI CO DINH", "ACTIVE");
-        System.out.println("-----------------------------------------------------------------------------------------------");
+        System.out.println(
+                "-----------------------------------------------------------------------------------------------");
         for (Room room : rooms) {
             System.out.printf(rowFormat,
                     room.getRoomId(),
@@ -483,6 +492,45 @@ public class AdminView {
                     equipment.getTotalQuantity(),
                     equipment.getAvailableQuantity(),
                     equipment.getStatus());
+        }
+    }
+
+    private void printServicesTable(List<Service> services) {
+        if (services.isEmpty()) {
+            System.out.println("Khong co du lieu dich vu.");
+            return;
+        }
+
+        String rowFormat = "%-6s %-35s %-15s %-15s%n";
+        System.out.printf(rowFormat, "ID", "TEN DICH VU", "DON GIA", "DON VI TINH");
+        System.out.println("-------------------------------------------------------------------");
+        for (Service service : services) {
+            System.out.printf(rowFormat,
+                    service.getServiceId(),
+                    truncate(service.getServiceName(), 35),
+                    String.format("%.2f", service.getPrice()),
+                    truncate(valueOrDash(service.getUnit()), 15));
+        }
+    }
+
+    private void printUsersTable(List<User> users) {
+        if (users.isEmpty()) {
+            System.out.println("Khong co du lieu user.");
+            return;
+        }
+
+        String rowFormat = "%-6s %-20s %-15s %-25s %-20s %-15s%n";
+        System.out.printf(rowFormat, "ID", "USERNAME", "ROLE", "HO TEN", "EMAIL", "PHONE");
+        System.out
+                .println("------------------------------------------------------------------------------------------");
+        for (User user : users) {
+            System.out.printf(rowFormat,
+                    user.getUserId(),
+                    truncate(user.getUsername(), 20),
+                    truncate(user.getRole(), 15),
+                    truncate(user.getFullName(), 25),
+                    truncate(valueOrDash(user.getEmail()), 20),
+                    truncate(valueOrDash(user.getPhone()), 15));
         }
     }
 

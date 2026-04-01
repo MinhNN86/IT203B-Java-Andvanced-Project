@@ -3,7 +3,6 @@ package dao;
 import model.Booking;
 import model.BookingDetail;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,9 +13,10 @@ import java.util.Optional;
 public interface BookingDao {
     /**
      * Tạo booking mới với trạng thái PENDING và chi tiết thiết bị/dịch vụ
-     * @param booking Thông tin booking cơ bản
+     * 
+     * @param booking           Thông tin booking cơ bản
      * @param equipmentRequests Map của equipment_id -> quantity
-     * @param serviceRequests Map của service_id -> quantity
+     * @param serviceRequests   Map của service_id -> quantity
      * @return ID của booking vừa tạo
      */
     int createPendingBookingWithDetails(Booking booking,
@@ -25,6 +25,7 @@ public interface BookingDao {
 
     /**
      * Tìm booking theo ID
+     * 
      * @param bookingId ID của booking cần tìm
      * @return Optional chứa Booking nếu tìm thấy, rỗng nếu không
      */
@@ -32,18 +33,21 @@ public interface BookingDao {
 
     /**
      * Lấy danh sách booking đang chờ duyệt
+     * 
      * @return Danh sách BookingDetail có trạng thái PENDING
      */
     List<BookingDetail> findPendingBookings();
 
     /**
      * Lấy tất cả booking
+     * 
      * @return Danh sách tất cả BookingDetail
      */
     List<BookingDetail> findAllBookings();
 
     /**
      * Lấy danh sách booking của một nhân viên
+     * 
      * @param employeeId ID của nhân viên
      * @return Danh sách BookingDetail của nhân viên
      */
@@ -51,6 +55,7 @@ public interface BookingDao {
 
     /**
      * Lấy danh sách booking được giao cho một support staff
+     * 
      * @param supportStaffId ID của support staff
      * @return Danh sách BookingDetail được giao cho support staff
      */
@@ -58,7 +63,8 @@ public interface BookingDao {
 
     /**
      * Duyệt booking đang chờ
-     * @param bookingId ID của booking cần duyệt
+     * 
+     * @param bookingId      ID của booking cần duyệt
      * @param supportStaffId ID của support staff được giao
      * @return true nếu duyệt thành công, false nếu không
      */
@@ -66,6 +72,7 @@ public interface BookingDao {
 
     /**
      * Từ chối booking đang chờ và giải phóng thiết bị
+     * 
      * @param bookingId ID của booking cần từ chối
      * @return true nếu từ chối thành công
      */
@@ -73,7 +80,8 @@ public interface BookingDao {
 
     /**
      * Hủy booking đang chờ bởi nhân viên
-     * @param bookingId ID của booking cần hủy
+     * 
+     * @param bookingId  ID của booking cần hủy
      * @param employeeId ID của nhân viên yêu cầu hủy
      * @return true nếu hủy thành công
      */
@@ -81,9 +89,10 @@ public interface BookingDao {
 
     /**
      * Cập nhật trạng thái chuẩn bị của booking
-     * @param bookingId ID của booking
+     * 
+     * @param bookingId      ID của booking
      * @param supportStaffId ID của support staff
-     * @param prepStatus Trạng thái mới (PREPARING, READY, COMPLETED)
+     * @param prepStatus     Trạng thái mới (PREPARING, READY, COMPLETED)
      * @return true nếu cập nhật thành công
      */
     boolean updatePreparationStatus(int bookingId, int supportStaffId, String prepStatus);
