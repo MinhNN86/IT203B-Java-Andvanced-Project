@@ -22,6 +22,11 @@ public class EquipmentService {
     public void createEquipment(String equipmentName, int totalQuantity, int availableQuantity, String status) {
         validateEquipment(equipmentName, totalQuantity, availableQuantity, status);
 
+        // Check for duplicate name
+        if (equipmentDao.existsByName(equipmentName)) {
+            throw new IllegalArgumentException("Ten thiet bi '" + equipmentName + "' da ton tai trong he thong.");
+        }
+
         Equipment equipment = new Equipment();
         equipment.setEquipmentName(equipmentName.trim());
         equipment.setTotalQuantity(totalQuantity);

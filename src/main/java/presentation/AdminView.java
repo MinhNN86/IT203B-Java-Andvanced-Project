@@ -157,7 +157,7 @@ public class AdminView {
 
             int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 4);
             switch (choice) {
-                case 1 -> equipmentService.getAllEquipments().forEach(System.out::println);
+                case 1 -> printEquipmentsTable(equipmentService.getAllEquipments());
                 case 2 -> {
                     String name = InputValidator.promptRequired(scanner, "Ten thiet bi: ");
                     int total = InputValidator.promptIntInRange(scanner, "Tong so luong: ", 1, Integer.MAX_VALUE);
@@ -167,9 +167,13 @@ public class AdminView {
                     System.out.println("Them thiet bi thanh cong.");
                 }
                 case 3 -> {
+                    System.out.println("\nDanh sach thiet bi hien tai:");
+                    printEquipmentsTable(equipmentService.getAllEquipments());
                     int equipmentId = InputValidator.promptIntInRange(scanner, "Equipment ID can cap nhat: ", 1,
                             Integer.MAX_VALUE);
                     Equipment current = equipmentService.getEquipmentById(equipmentId);
+                    System.out.println("\nThong tin thiet bi hien tai:");
+                    printEquipmentsTable(List.of(current));
 
                     String name = InputValidator.promptOptional(scanner, "Ten thiet bi moi (bo trong de giu): ");
                     if (name.isBlank()) {
@@ -195,6 +199,8 @@ public class AdminView {
                     System.out.println("Cap nhat thiet bi thanh cong.");
                 }
                 case 4 -> {
+                    System.out.println("\nDanh sach thiet bi hien tai:");
+                    printEquipmentsTable(equipmentService.getAllEquipments());
                     int equipmentId = InputValidator.promptIntInRange(scanner, "Equipment ID can xoa: ", 1,
                             Integer.MAX_VALUE);
                     equipmentService.deleteEquipment(equipmentId);
@@ -458,6 +464,25 @@ public class AdminView {
                     truncate(valueOrDash(room.getLocation()), 18),
                     truncate(valueOrDash(room.getFixedEquipment()), 28),
                     room.isActive() ? "YES" : "NO");
+        }
+    }
+
+    private void printEquipmentsTable(List<Equipment> equipments) {
+        if (equipments.isEmpty()) {
+            System.out.println("Khong co du lieu thiet bi.");
+            return;
+        }
+
+        String rowFormat = "%-6s %-30s %-15s %-15s %-12s%n";
+        System.out.printf(rowFormat, "ID", "TEN THIET BI", "SO LUONG", "KHA DUNG", "TRANG THAI");
+        System.out.println("--------------------------------------------------------------------------------");
+        for (Equipment equipment : equipments) {
+            System.out.printf(rowFormat,
+                    equipment.getEquipmentId(),
+                    truncate(equipment.getEquipmentName(), 30),
+                    equipment.getTotalQuantity(),
+                    equipment.getAvailableQuantity(),
+                    equipment.getStatus());
         }
     }
 

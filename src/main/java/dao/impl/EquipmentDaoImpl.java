@@ -189,4 +189,26 @@ public class EquipmentDaoImpl extends BaseDao implements EquipmentDao {
         equipment.setStatus(resultSet.getString("status"));
         return equipment;
     }
+
+    /**
+     * Kiểm tra xem tên thiết bị đã tồn tại chưa
+     * @param equipmentName Tên thiết bị cần kiểm tra
+     * @return true nếu tên đã tồn tại, false nếu chưa
+     */
+    @Override
+    public boolean existsByName(String equipmentName) {
+        String sql = "SELECT COUNT(*) FROM equipments WHERE equipment_name = ?";
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, equipmentName.trim());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the kiem tra ten thiet bi.", ex);
+        }
+        return false;
+    }
 }

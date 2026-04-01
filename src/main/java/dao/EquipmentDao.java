@@ -62,4 +62,11 @@ public interface EquipmentDao {
      * @throws SQLException nếu có lỗi database
      */
     void releaseForBooking(Connection connection, Map<Integer, Integer> equipmentRequests) throws SQLException;
+
+    /**
+     * Kiểm tra xem tên thiết bị đã tồn tại chưa
+     * @param equipmentName Tên thiết bị cần kiểm tra
+     * @return true nếu tên đã tồn tại, false nếu chưa
+     */
+    boolean existsByName(String equipmentName);
 }

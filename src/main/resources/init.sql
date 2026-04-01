@@ -29,7 +29,7 @@ CREATE TABLE rooms (
 -- 3. Bảng Thiết bị di động (Equipments)
 CREATE TABLE equipments (
     equipment_id INT AUTO_INCREMENT PRIMARY KEY,
-    equipment_name VARCHAR(100) NOT NULL,
+    equipment_name VARCHAR(100) NOT NULL UNIQUE,
     total_quantity INT NOT NULL,
     available_quantity INT NOT NULL,
     status ENUM('ACTIVE', 'MAINTENANCE', 'INACTIVE') DEFAULT 'ACTIVE'
