@@ -71,7 +71,7 @@ public class MenuManager {
 
     private void handleLogin() {
         String username = InputValidator.promptRequired(scanner, "Username: ");
-        String password = InputValidator.promptRequired(scanner, "Password: ");
+        String password = InputValidator.promptPasswordMasked(scanner, "Password: ");
 
         User user = authService.login(username, password);
         System.out.println("Dang nhap thanh cong. Xin chao " + user.getFullName() + " (" + user.getRole() + ")");

@@ -1,5 +1,13 @@
 package util;
 
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,6 +31,21 @@ public class InputValidator {
     public static String promptOptional(Scanner scanner, String label) {
         System.out.print(label);
         return scanner.nextLine().trim();
+    }
+
+    public static String promptPasswordMasked(Scanner scanner, String label) {
+        while (true) {
+            String value = tryReadPasswordMasked(label);
+            if (value == null) {
+                return promptRequired(scanner, label);
+            }
+
+            value = value.trim();
+            if (!value.isEmpty()) {
+                return value;
+            }
+            System.out.println("Khong duoc de trong.");
+        }
     }
 
     public static int promptIntInRange(Scanner scanner, String label, int min, int max) {
@@ -107,5 +130,24 @@ public class InputValidator {
             result.put(id, result.getOrDefault(id, 0) + qty);
         }
         return result;
+    }
+
+    private static String tryReadPasswordMasked(String label) {
+        if (System.console() == null) {
+            return null;
+        }
+
+        try (Terminal terminal = TerminalBuilder.builder()
+                .system(true)
+                .build()) {
+            LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .build();
+            return reader.readLine(label, '*');
+        } catch (IOException | UserInterruptException | EndOfFileException ex) {
+            return null;
+        } catch (RuntimeException ex) {
+            return null;
+        }
     }
 }

@@ -14,6 +14,14 @@ public class RoomService {
         return roomDao.findAll();
     }
 
+    public List<Room> searchRoomsByName(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new IllegalArgumentException("Tu khoa tim kiem khong duoc de trong.");
+        }
+
+        return roomDao.searchByName(keyword.trim());
+    }
+
     public Room getRoomById(int roomId) {
         return roomDao.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("Khong tim thay phong voi id = " + roomId));

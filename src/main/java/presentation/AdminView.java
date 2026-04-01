@@ -72,15 +72,26 @@ public class AdminView {
         while (running) {
             System.out.println("\n--- QUAN LY PHONG ---");
             System.out.println("1. Xem danh sach");
-            System.out.println("2. Them moi");
-            System.out.println("3. Cap nhat");
-            System.out.println("4. Xoa (deactivate)");
+            System.out.println("2. Tim phong theo ten");
+            System.out.println("3. Them moi");
+            System.out.println("4. Cap nhat");
+            System.out.println("5. Xoa (deactivate)");
             System.out.println("0. Quay lai");
 
-            int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 4);
+            int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 5);
             switch (choice) {
-                case 1 -> roomService.getAllRooms().forEach(System.out::println);
+                case 1 -> printRoomsTable(roomService.getAllRooms());
                 case 2 -> {
+                    String keyword = InputValidator.promptRequired(scanner, "Nhap ten phong can tim: ");
+                    List<Room> matchedRooms = roomService.searchRoomsByName(keyword);
+                    if (matchedRooms.isEmpty()) {
+                        System.out.println("Khong tim thay phong phu hop.");
+                    } else {
+                        System.out.println("\n--- KET QUA TIM KIEM PHONG ---");
+                        printRoomsTable(matchedRooms);
+                    }
+                }
+                case 3 -> {
                     String name = InputValidator.promptRequired(scanner, "Ten phong: ");
                     int capacity = InputValidator.promptIntInRange(scanner, "Suc chua: ", 1, Integer.MAX_VALUE);
                     String location = InputValidator.promptOptional(scanner, "Vi tri: ");
@@ -88,10 +99,14 @@ public class AdminView {
                     roomService.createRoom(name, capacity, location, fixedEquipment);
                     System.out.println("Them phong thanh cong.");
                 }
-                case 3 -> {
+                case 4 -> {
+                    System.out.println("\nDanh sach phong hien tai:");
+                    printRoomsTable(roomService.getAllRooms());
                     int roomId = InputValidator.promptIntInRange(scanner, "Room ID can cap nhat: ", 1,
                             Integer.MAX_VALUE);
                     Room current = roomService.getRoomById(roomId);
+                    System.out.println("\nThong tin phong hien tai:");
+                    printRoomsTable(List.of(current));
 
                     String name = InputValidator.promptOptional(scanner, "Ten phong moi (bo trong de giu): ");
                     if (name.isBlank()) {
@@ -116,7 +131,9 @@ public class AdminView {
                     roomService.updateRoom(roomId, name, capacity, location, fixedEquipment, activeChoice == 1);
                     System.out.println("Cap nhat phong thanh cong.");
                 }
-                case 4 -> {
+                case 5 -> {
+                    System.out.println("\nDanh sach phong hien tai:");
+                    printRoomsTable(roomService.getAllRooms());
                     int roomId = InputValidator.promptIntInRange(scanner, "Room ID can xoa: ", 1, Integer.MAX_VALUE);
                     roomService.deactivateRoom(roomId);
                     System.out.println("Da deactivate phong.");
@@ -422,6 +439,36 @@ public class AdminView {
             System.out.println("Thiet bi   : " + valueOrDash(booking.getEquipmentSummary()));
             System.out.println("Dich vu    : " + valueOrDash(booking.getServiceSummary()));
         }
+    }
+
+    private void printRoomsTable(List<Room> rooms) {
+        if (rooms.isEmpty()) {
+            System.out.println("Khong co du lieu phong.");
+            return;
+        }
+
+        String rowFormat = "%-6s %-22s %-10s %-18s %-28s %-8s%n";
+        System.out.printf(rowFormat, "ID", "TEN PHONG", "SUC CHUA", "VI TRI", "THIET BI CO DINH", "ACTIVE");
+        System.out.println("-----------------------------------------------------------------------------------------------");
+        for (Room room : rooms) {
+            System.out.printf(rowFormat,
+                    room.getRoomId(),
+                    truncate(room.getRoomName(), 22),
+                    room.getCapacity(),
+                    truncate(valueOrDash(room.getLocation()), 18),
+                    truncate(valueOrDash(room.getFixedEquipment()), 28),
+                    room.isActive() ? "YES" : "NO");
+        }
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return "-";
+        }
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength - 3) + "...";
     }
 
     private String readEquipmentStatus() {

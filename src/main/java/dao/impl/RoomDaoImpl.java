@@ -36,6 +36,24 @@ public class RoomDaoImpl extends BaseDao implements RoomDao {
         return rooms;
     }
 
+    @Override
+    public List<Room> searchByName(String keyword) {
+        String sql = "SELECT * FROM rooms WHERE LOWER(room_name) LIKE ? ORDER BY room_id";
+        List<Room> rooms = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, "%" + keyword.toLowerCase() + "%");
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    rooms.add(mapRoom(resultSet));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the tim phong theo ten.", ex);
+        }
+        return rooms;
+    }
+
     /**
      * Tìm phòng theo ID
      * @param roomId ID của phòng cần tìm

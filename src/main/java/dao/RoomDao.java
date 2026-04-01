@@ -16,6 +16,13 @@ public interface RoomDao {
     List<Room> findAll();
 
     /**
+     * Tim phong theo ten (tim kiem tuong doi)
+     * @param keyword Tu khoa ten phong
+     * @return Danh sach phong khop voi tu khoa
+     */
+    List<Room> searchByName(String keyword);
+
+    /**
      * Tìm phòng theo ID
      * @param roomId ID của phòng cần tìm
      * @return Optional chứa Room nếu tìm thấy, rỗng nếu không
