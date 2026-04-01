@@ -23,6 +23,7 @@ public class AuthService {
         if (userDao.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username da ton tai.");
         }
+        ensurePhoneUnique(phone, null);
 
         User user = new User();
         user.setUsername(username.trim());
@@ -52,6 +53,7 @@ public class AuthService {
         if (userDao.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username da ton tai.");
         }
+        ensurePhoneUnique(phone, null);
 
         User user = new User();
         user.setUsername(username.trim());
@@ -83,6 +85,7 @@ public class AuthService {
             String email,
             String phone) {
         validateContact(email, phone);
+        ensurePhoneUnique(phone, currentUser.getUserId());
 
         currentUser.setFullName(fullName.trim());
         currentUser.setEmail(email);
@@ -127,7 +130,6 @@ public class AuthService {
             String email,
             String phone) {
         validateRole(role);
-        validateCredentials(username, plainPassword);
         validateContact(email, phone);
 
         User existingUser = userDao.findById(userId)
@@ -139,9 +141,16 @@ public class AuthService {
                 throw new IllegalArgumentException("Username da ton tai.");
             }
         }
+        ensurePhoneUnique(phone, userId);
 
         existingUser.setUsername(username.trim());
-        existingUser.setPassword(SecurityUtil.hashPassword(plainPassword));
+        // Only update password if plainPassword is not empty
+        if (plainPassword != null && !plainPassword.isBlank()) {
+            if (plainPassword.length() < 6) {
+                throw new IllegalArgumentException("Mat khau toi thieu 6 ky tu.");
+            }
+            existingUser.setPassword(SecurityUtil.hashPassword(plainPassword));
+        }
         existingUser.setRole(role);
         existingUser.setFullName(fullName.trim());
         existingUser.setEmail(email);
@@ -195,7 +204,29 @@ public class AuthService {
             throw new IllegalArgumentException("Email khong hop le.");
         }
         if (!InputValidator.isValidPhone(phone)) {
-            throw new IllegalArgumentException("So dien thoai khong hop le.");
+            throw new IllegalArgumentException("So dien thoai phai de trong hoac gom dung 10 chu so.");
         }
+    }
+
+    private void ensurePhoneUnique(String phone, Integer currentUserId) {
+        String normalizedPhone = normalizeBlank(phone);
+        if (normalizedPhone == null) {
+            return;
+        }
+
+        Optional<User> userByPhone = userDao.findByPhone(normalizedPhone);
+        if (userByPhone.isPresent()) {
+            User existing = userByPhone.get();
+            if (currentUserId == null || existing.getUserId() != currentUserId) {
+                throw new IllegalArgumentException("So dien thoai da ton tai.");
+            }
+        }
+    }
+
+    private String normalizeBlank(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }

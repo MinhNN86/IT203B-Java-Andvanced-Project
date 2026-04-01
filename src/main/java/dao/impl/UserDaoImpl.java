@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -36,6 +37,33 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             }
         } catch (SQLException ex) {
             throw new RuntimeException("Khong the tim user theo username.", ex);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Tìm user theo số điện thoại
+     * @param phone Số điện thoại cần tìm
+     * @return Optional chứa User nếu tìm thấy, rỗng nếu không
+     */
+    @Override
+    public Optional<User> findByPhone(String phone) {
+        String normalizedPhone = normalizeBlank(phone);
+        if (normalizedPhone == null) {
+            return Optional.empty();
+        }
+
+        String sql = "SELECT * FROM users WHERE phone = ?";
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, normalizedPhone);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapUser(resultSet));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the tim user theo so dien thoai.", ex);
         }
         return Optional.empty();
     }
@@ -91,6 +119,9 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             }
             return true;
         } catch (SQLException ex) {
+            if (isDuplicatePhoneError(ex)) {
+                throw new IllegalArgumentException("So dien thoai da ton tai.");
+            }
             throw new RuntimeException("Khong the tao user moi.", ex);
         }
     }
@@ -111,6 +142,9 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             statement.setInt(4, user.getUserId());
             return statement.executeUpdate() > 0;
         } catch (SQLException ex) {
+            if (isDuplicatePhoneError(ex)) {
+                throw new IllegalArgumentException("So dien thoai da ton tai.");
+            }
             throw new RuntimeException("Khong the cap nhat profile.", ex);
         }
     }
@@ -177,6 +211,9 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             statement.setInt(7, user.getUserId());
             return statement.executeUpdate() > 0;
         } catch (SQLException ex) {
+            if (isDuplicatePhoneError(ex)) {
+                throw new IllegalArgumentException("So dien thoai da ton tai.");
+            }
             throw new RuntimeException("Khong the cap nhat user.", ex);
         }
     }
@@ -230,5 +267,11 @@ public class UserDaoImpl extends BaseDao implements UserDao {
             return null;
         }
         return value.trim();
+    }
+
+    private boolean isDuplicatePhoneError(SQLException ex) {
+        return ex instanceof SQLIntegrityConstraintViolationException
+                && ex.getMessage() != null
+                && ex.getMessage().toLowerCase().contains("phone");
     }
 }

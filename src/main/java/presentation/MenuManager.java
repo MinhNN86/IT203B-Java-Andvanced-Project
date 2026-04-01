@@ -64,7 +64,6 @@ public class MenuManager {
         String fullName = InputValidator.promptRequired(scanner, "Ho ten: ");
         String email = InputValidator.promptOptional(scanner, "Email: ");
         String phone = InputValidator.promptOptional(scanner, "Phone: ");
-        String department = InputValidator.promptOptional(scanner, "Phong ban: ");
 
         authService.registerEmployee(username, password, fullName, email, phone);
         System.out.println("Dang ky thanh cong. Ban co the dang nhap ngay bay gio.");

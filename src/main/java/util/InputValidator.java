@@ -74,7 +74,7 @@ public class InputValidator {
     }
 
     public static boolean isValidPhone(String phone) {
-        return phone == null || phone.isBlank() || phone.matches("^[0-9+()\\-\\s]{6,20}$");
+        return phone == null || phone.isBlank() || phone.matches("^\\d{10}$");
     }
 
     public static Map<Integer, Integer> parseItemQuantityMap(String input) {

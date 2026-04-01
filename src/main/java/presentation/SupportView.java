@@ -48,22 +48,31 @@ public class SupportView {
             return;
         }
 
-        for (BookingDetail detail : details) {
-            System.out.println("----------------------------------------");
-            System.out.println("Booking ID : " + detail.getBookingId());
-            System.out.println("Nhan vien  : " + detail.getEmployeeName());
-            System.out.println("Phong      : " + detail.getRoomName());
-            System.out.println("Bat dau    : " + DateUtil.formatDateTime(detail.getStartTime()));
-            System.out.println("Ket thuc   : " + DateUtil.formatDateTime(detail.getEndTime()));
-            System.out.println("Trang thai : " + detail.getBookingStatus());
-            System.out.println("Prep status: " + detail.getPrepStatus());
-            System.out.println("Thiet bi   : " + valueOrDash(detail.getEquipmentSummary()));
-            System.out.println("Dich vu    : " + valueOrDash(detail.getServiceSummary()));
-        }
+        printBookingDetails(details);
     }
 
     private void updatePreparationStatus(int supportStaffId) {
-        int bookingId = InputValidator.promptIntInRange(scanner, "Nhap bookingId can cap nhat: ", 1, Integer.MAX_VALUE);
+        List<BookingDetail> details = bookingService.getBookingsBySupportStaff(supportStaffId);
+        if (details.isEmpty()) {
+            System.out.println("Ban chua duoc phan cong booking nao.");
+            return;
+        }
+
+        System.out.println("\n--- BOOKING DUOC PHAN CONG ---");
+        printBookingDetails(details);
+
+        int bookingId;
+        while (true) {
+            bookingId = InputValidator.promptIntInRange(scanner, "Nhap bookingId can cap nhat: ", 1, Integer.MAX_VALUE);
+            final int selectedBookingId = bookingId;
+            boolean assignedToCurrentSupport = details.stream()
+                    .anyMatch(detail -> detail.getBookingId() == selectedBookingId);
+            if (assignedToCurrentSupport) {
+                break;
+            }
+            System.out.println("BookingId khong nam trong danh sach duoc phan cong. Vui long nhap lai.");
+        }
+
         int statusChoice = InputValidator.promptIntInRange(
                 scanner,
                 "Trang thai (1:PREPARING, 2:READY, 3:MISSING_EQUIPMENT): ",
@@ -79,6 +88,21 @@ public class SupportView {
 
         bookingService.updatePreparationStatus(bookingId, supportStaffId, prepStatus);
         System.out.println("Cap nhat prep status thanh cong.");
+    }
+
+    private void printBookingDetails(List<BookingDetail> details) {
+        for (BookingDetail detail : details) {
+            System.out.println("----------------------------------------");
+            System.out.println("Booking ID : " + detail.getBookingId());
+            System.out.println("Nhan vien  : " + detail.getEmployeeName());
+            System.out.println("Phong      : " + detail.getRoomName());
+            System.out.println("Bat dau    : " + DateUtil.formatDateTime(detail.getStartTime()));
+            System.out.println("Ket thuc   : " + DateUtil.formatDateTime(detail.getEndTime()));
+            System.out.println("Trang thai : " + detail.getBookingStatus());
+            System.out.println("Prep status: " + detail.getPrepStatus());
+            System.out.println("Thiet bi   : " + valueOrDash(detail.getEquipmentSummary()));
+            System.out.println("Dich vu    : " + valueOrDash(detail.getServiceSummary()));
+        }
     }
 
     private String valueOrDash(String value) {

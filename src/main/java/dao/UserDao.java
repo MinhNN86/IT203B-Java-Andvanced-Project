@@ -17,6 +17,13 @@ public interface UserDao {
     Optional<User> findByUsername(String username);
 
     /**
+     * Tìm user theo số điện thoại
+     * @param phone Số điện thoại cần tìm
+     * @return Optional chứa User nếu tìm thấy, rỗng nếu không
+     */
+    Optional<User> findByPhone(String phone);
+
+    /**
      * Tìm user theo ID
      * @param userId ID của user cần tìm
      * @return Optional chứa User nếu tìm thấy, rỗng nếu không

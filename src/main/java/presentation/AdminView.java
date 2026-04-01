@@ -44,7 +44,7 @@ public class AdminView {
             System.out.println("4. Quan ly user (CRUD)");
             System.out.println("5. Duyet/Tu choi booking PENDING");
             System.out.println("6. Xem tat ca booking");
-            System.out.println("7. Tao tai khoan EMPLOYEE/SUPPORT/ADMIN");
+            System.out.println("7. Tao tai khoan SUPPORT/ADMIN");
             System.out.println("0. Dang xuat");
 
             int choice = InputValidator.promptIntInRange(scanner, "Chon: ", 0, 7);
@@ -266,12 +266,11 @@ public class AdminView {
                     authService.getAllUsers().forEach(System.out::println);
                 }
                 case 2 -> {
-                    int roleChoice = InputValidator.promptIntInRange(scanner, 
-                            "Loai tai khoan (1:EMPLOYEE, 2:SUPPORT_STAFF, 3:ADMIN): ", 1, 3);
+                    int roleChoice = InputValidator.promptIntInRange(scanner,
+                            "Loai tai khoan (1:SUPPORT_STAFF, 2:ADMIN): ", 1, 2);
                     String role = switch (roleChoice) {
-                        case 1 -> "EMPLOYEE";
-                        case 2 -> "SUPPORT_STAFF";
-                        case 3 -> "ADMIN";
+                        case 1 -> "SUPPORT_STAFF";
+                        case 2 -> "ADMIN";
                         default -> throw new IllegalStateException("Gia tri role khong hop le.");
                     };
 
@@ -386,11 +385,11 @@ public class AdminView {
     }
 
     private void createSupportOrAdmin() {
-        int roleChoice = InputValidator.promptIntInRange(scanner, "Loai tai khoan (1:EMPLOYEE, 2:SUPPORT_STAFF, 3:ADMIN): ", 1, 3);
+        int roleChoice = InputValidator.promptIntInRange(scanner,
+                "Loai tai khoan (1:SUPPORT_STAFF, 2:ADMIN): ", 1, 2);
         String role = switch (roleChoice) {
-            case 1 -> "EMPLOYEE";
-            case 2 -> "SUPPORT_STAFF";
-            case 3 -> "ADMIN";
+            case 1 -> "SUPPORT_STAFF";
+            case 2 -> "ADMIN";
             default -> throw new IllegalStateException("Gia tri role khong hop le.");
         };
 
