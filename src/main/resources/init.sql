@@ -1,6 +1,9 @@
 CREATE DATABASE IF NOT EXISTS prj_meeting_java_05;
 USE prj_meeting_java_05;
 
+-- Set timezone to Vietnam (UTC+7)
+SET time_zone = '+07:00';
+
 -- 1. Bảng Người dùng (Users)
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,

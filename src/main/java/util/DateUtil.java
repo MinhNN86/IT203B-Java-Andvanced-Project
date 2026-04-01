@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class DateUtil {
-    public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm";
+    public static final String DATETIME_PATTERN = "HH:mm dd-MM-yyyy";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
 
     private DateUtil() {
