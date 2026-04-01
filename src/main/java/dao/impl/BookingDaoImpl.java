@@ -27,9 +27,10 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Tạo booking mới với trạng thái PENDING và chi tiết thiết bị/dịch vụ
-     * @param booking Thông tin booking cơ bản
+     * 
+     * @param booking           Thông tin booking cơ bản
      * @param equipmentRequests Map của equipment_id -> quantity
-     * @param serviceRequests Map của service_id -> quantity
+     * @param serviceRequests   Map của service_id -> quantity
      * @return ID của booking vừa tạo
      */
     @Override
@@ -39,14 +40,16 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
         try (Connection connection = getConnection()) {
             connection.setAutoCommit(false);
             try {
-                if (hasRoomConflict(connection, booking.getRoomId(), booking.getStartTime(), booking.getEndTime(), null)) {
+                if (hasRoomConflict(connection, booking.getRoomId(), booking.getStartTime(), booking.getEndTime(),
+                        null)) {
                     throw new IllegalArgumentException("Phong da co lich trung trong khung gio nay.");
                 }
 
                 String bookingSql = "INSERT INTO bookings(employee_id, room_id, start_time, end_time, booking_status, prep_status) VALUES (?, ?, ?, ?, 'PENDING', 'PENDING')";
 
                 int bookingId;
-                try (PreparedStatement statement = connection.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
+                try (PreparedStatement statement = connection.prepareStatement(bookingSql,
+                        Statement.RETURN_GENERATED_KEYS)) {
                     statement.setInt(1, booking.getEmployeeId());
                     statement.setInt(2, booking.getRoomId());
                     statement.setTimestamp(3, Timestamp.valueOf(booking.getStartTime()));
@@ -80,6 +83,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Tìm booking theo ID
+     * 
      * @param bookingId ID của booking cần tìm
      * @return Optional chứa Booking nếu tìm thấy, rỗng nếu không
      */
@@ -102,6 +106,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy danh sách booking đang chờ duyệt
+     * 
      * @return Danh sách BookingDetail có trạng thái PENDING
      */
     @Override
@@ -111,6 +116,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy tất cả booking
+     * 
      * @return Danh sách tất cả BookingDetail
      */
     @Override
@@ -120,6 +126,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy danh sách booking của một nhân viên
+     * 
      * @param employeeId ID của nhân viên
      * @return Danh sách BookingDetail của nhân viên
      */
@@ -130,6 +137,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy danh sách booking được giao cho một support staff
+     * 
      * @param supportStaffId ID của support staff
      * @return Danh sách BookingDetail được giao cho support staff
      */
@@ -140,7 +148,8 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Duyệt booking đang chờ
-     * @param bookingId ID của booking cần duyệt
+     * 
+     * @param bookingId      ID của booking cần duyệt
      * @param supportStaffId ID của support staff được giao
      * @return true nếu duyệt thành công, false nếu không
      */
@@ -159,6 +168,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Từ chối booking đang chờ và giải phóng thiết bị
+     * 
      * @param bookingId ID của booking cần từ chối
      * @return true nếu từ chối thành công
      */
@@ -195,7 +205,8 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Hủy booking đang chờ bởi nhân viên
-     * @param bookingId ID của booking cần hủy
+     * 
+     * @param bookingId  ID của booking cần hủy
      * @param employeeId ID của nhân viên yêu cầu hủy
      * @return true nếu hủy thành công
      */
@@ -248,9 +259,10 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Cập nhật trạng thái chuẩn bị của booking
-     * @param bookingId ID của booking
+     * 
+     * @param bookingId      ID của booking
      * @param supportStaffId ID của support staff
-     * @param prepStatus Trạng thái mới (PREPARING, READY, COMPLETED)
+     * @param prepStatus     Trạng thái mới (PREPARING, READY, COMPLETED)
      * @return true nếu cập nhật thành công
      */
     @Override
@@ -269,8 +281,9 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Khóa booking để kiểm tra trạng thái PENDING
+     * 
      * @param connection Kết nối database
-     * @param bookingId ID của booking
+     * @param bookingId  ID của booking
      * @return Booking đã khóa
      */
     private Booking lockPendingBooking(Connection connection, int bookingId) throws SQLException {
@@ -292,8 +305,9 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy danh sách thiết bị đã đặt cho booking
+     * 
      * @param connection Kết nối database
-     * @param bookingId ID của booking
+     * @param bookingId  ID của booking
      * @return Map của equipment_id -> quantity
      */
     private Map<Integer, Integer> getEquipmentRequests(Connection connection, int bookingId) throws SQLException {
@@ -312,8 +326,9 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Thêm chi tiết thiết bị cho booking
-     * @param connection Kết nối database
-     * @param bookingId ID của booking
+     * 
+     * @param connection        Kết nối database
+     * @param bookingId         ID của booking
      * @param equipmentRequests Map của equipment_id -> quantity
      */
     private void insertBookingEquipments(Connection connection, int bookingId, Map<Integer, Integer> equipmentRequests)
@@ -336,8 +351,9 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Thêm chi tiết dịch vụ cho booking
-     * @param connection Kết nối database
-     * @param bookingId ID của booking
+     * 
+     * @param connection      Kết nối database
+     * @param bookingId       ID của booking
      * @param serviceRequests Map của service_id -> quantity
      */
     private void insertBookingServices(Connection connection, int bookingId, Map<Integer, Integer> serviceRequests)
@@ -361,11 +377,13 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Kiểm tra xem phòng có bị trùng lịch không
-     * @param connection Kết nối database
-     * @param roomId ID của phòng
-     * @param startTime Thời gian bắt đầu
-     * @param endTime Thời gian kết thúc
-     * @param excludeBookingId ID của booking cần loại khỏi kiểm tra (null nếu không)
+     * 
+     * @param connection       Kết nối database
+     * @param roomId           ID của phòng
+     * @param startTime        Thời gian bắt đầu
+     * @param endTime          Thời gian kết thúc
+     * @param excludeBookingId ID của booking cần loại khỏi kiểm tra (null nếu
+     *                         không)
      * @return true nếu có trùng lịch, false nếu không
      */
     private boolean hasRoomConflict(Connection connection, int roomId, LocalDateTime startTime, LocalDateTime endTime,
@@ -393,11 +411,13 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Tìm danh sách booking chi tiết theo điều kiện
+     * 
      * @param whereClause Điều kiện WHERE (có thể rỗng)
      * @return Danh sách BookingDetail
      */
     private List<BookingDetail> findBookingDetails(String whereClause) {
-        String sql = "SELECT b.booking_id, r.room_name, u.full_name AS employee_name, b.start_time, b.end_time, b.booking_status, b.prep_status, COALESCE(ss.full_name, '-') AS support_staff_name, COALESCE(eq.equipment_summary, '-') AS equipment_summary, COALESCE(sv.service_summary, '-') AS service_summary FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN users u ON u.user_id = b.employee_id LEFT JOIN users ss ON ss.user_id = b.support_staff_id LEFT JOIN (SELECT be.booking_id, GROUP_CONCAT(CONCAT(e.equipment_name, ' x', be.quantity) ORDER BY e.equipment_name SEPARATOR ', ') AS equipment_summary FROM booking_equipments be JOIN equipments e ON e.equipment_id = be.equipment_id GROUP BY be.booking_id) eq ON eq.booking_id = b.booking_id LEFT JOIN (SELECT bs.booking_id, GROUP_CONCAT(CONCAT(s.service_name, ' x', bs.quantity) ORDER BY s.service_name SEPARATOR ', ') AS service_summary FROM booking_services bs JOIN services s ON s.service_id = bs.service_id GROUP BY bs.booking_id) sv ON sv.booking_id = b.booking_id %s ORDER BY b.start_time DESC".formatted(whereClause);
+        String sql = "SELECT b.booking_id, r.room_name, u.full_name AS employee_name, b.start_time, b.end_time, b.booking_status, b.prep_status, COALESCE(ss.full_name, '-') AS support_staff_name, COALESCE(eq.equipment_summary, '-') AS equipment_summary, COALESCE(sv.service_summary, '-') AS service_summary FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN users u ON u.user_id = b.employee_id LEFT JOIN users ss ON ss.user_id = b.support_staff_id LEFT JOIN (SELECT be.booking_id, GROUP_CONCAT(CONCAT(e.equipment_name, ' x', be.quantity) ORDER BY e.equipment_name SEPARATOR ', ') AS equipment_summary FROM booking_equipments be JOIN equipments e ON e.equipment_id = be.equipment_id GROUP BY be.booking_id) eq ON eq.booking_id = b.booking_id LEFT JOIN (SELECT bs.booking_id, GROUP_CONCAT(CONCAT(s.service_name, ' x', bs.quantity) ORDER BY s.service_name SEPARATOR ', ') AS service_summary FROM booking_services bs JOIN services s ON s.service_id = bs.service_id GROUP BY bs.booking_id) sv ON sv.booking_id = b.booking_id %s ORDER BY b.start_time DESC"
+                .formatted(whereClause);
 
         List<BookingDetail> details = new ArrayList<>();
         try (Connection connection = getConnection();
@@ -414,6 +434,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Chuyển đổi ResultSet sang đối tượng Booking
+     * 
      * @param resultSet ResultSet từ database
      * @return Đối tượng Booking
      */
@@ -441,6 +462,7 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Chuyển đổi ResultSet sang đối tượng BookingDetail
+     * 
      * @param resultSet ResultSet từ database
      * @return Đối tượng BookingDetail
      */
@@ -457,5 +479,31 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
         detail.setEquipmentSummary(resultSet.getString("equipment_summary"));
         detail.setServiceSummary(resultSet.getString("service_summary"));
         return detail;
+    }
+
+    /**
+     * Lấy danh sách phòng trống trong khoảng thời gian
+     * 
+     * @param startTime Thời gian bắt đầu
+     * @param endTime   Thời gian kết thúc
+     * @return Danh sách ID phòng trống
+     */
+    @Override
+    public List<Integer> findAvailableRoomIds(LocalDateTime startTime, LocalDateTime endTime) {
+        String sql = "SELECT r.room_id FROM rooms r WHERE r.is_active = 1 AND r.room_id NOT IN (SELECT b.room_id FROM bookings b WHERE b.booking_status IN ('PENDING', 'APPROVED') AND (? < b.end_time AND ? > b.start_time))";
+        List<Integer> availableRoomIds = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setTimestamp(1, Timestamp.valueOf(startTime));
+            statement.setTimestamp(2, Timestamp.valueOf(endTime));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    availableRoomIds.add(resultSet.getInt("room_id"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong tim danh sach phong trong.", ex);
+        }
+        return availableRoomIds;
     }
 }

@@ -3,6 +3,7 @@ package dao;
 import model.Booking;
 import model.BookingDetail;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -96,4 +97,13 @@ public interface BookingDao {
      * @return true nếu cập nhật thành công
      */
     boolean updatePreparationStatus(int bookingId, int supportStaffId, String prepStatus);
+
+    /**
+     * Lấy danh sách phòng trống trong khoảng thời gian
+     *
+     * @param startTime Thời gian bắt đầu
+     * @param endTime   Thời gian kết thúc
+     * @return Danh sách ID phòng trống
+     */
+    List<Integer> findAvailableRoomIds(LocalDateTime startTime, LocalDateTime endTime);
 }

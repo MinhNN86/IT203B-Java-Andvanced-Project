@@ -167,4 +167,15 @@ public class BookingService {
             }
         }
     }
+
+    /**
+     * Lấy danh sách phòng trống trong khoảng thời gian
+     * 
+     * @param startTime Thời gian bắt đầu
+     * @param endTime   Thời gian kết thúc
+     * @return Danh sách ID phòng trống
+     */
+    public List<Integer> findAvailableRoomIds(LocalDateTime startTime, LocalDateTime endTime) {
+        return bookingDao.findAvailableRoomIds(startTime, endTime);
+    }
 }
