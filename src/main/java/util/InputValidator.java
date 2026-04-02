@@ -132,21 +132,35 @@ public class InputValidator {
         return result;
     }
 
+    /**
+     * Thu nhap mat khau voi che do an ky tu da nhap bang dau '*'.
+     * Tra ve null neu moi truong terminal khong ho tro (hoac nguoi dung huy),
+     * de ham goi ben ngoai fallback ve cach nhap thong thuong.
+     */
     private static String tryReadPasswordMasked(String label) {
-        if (System.console() == null) {
-            return null;
-        }
-
         try (Terminal terminal = TerminalBuilder.builder()
                 .system(true)
+                .providers("exec,dumb")
+                .jni(false)
+                .jna(false)
+                .jansi(false)
+                .ffm(false)
+                .nativeSignals(false)
+                .dumb(true)
                 .build()) {
             LineReader reader = LineReaderBuilder.builder()
                     .terminal(terminal)
                     .build();
+            // Tham so thu 2 la ky tu mask: moi ky tu mat khau nhap vao se hien thi thanh
+            // '*'.
             return reader.readLine(label, '*');
         } catch (IOException | UserInterruptException | EndOfFileException ex) {
+            // Cac loi I/O hoac nguoi dung nhan Ctrl+C/Ctrl+D: bao cho caller biet de
+            // fallback.
             return null;
         } catch (RuntimeException ex) {
+            // Bat cac loi runtime bat ngo tu terminal implementation de khong vo chuong
+            // trinh.
             return null;
         }
     }
