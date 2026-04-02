@@ -106,44 +106,147 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
 
     /**
      * Lấy danh sách booking đang chờ duyệt
-     * 
+     *
      * @return Danh sách BookingDetail có trạng thái PENDING
      */
     @Override
     public List<BookingDetail> findPendingBookings() {
-        return findBookingDetails("WHERE b.booking_status = 'PENDING'");
+        String sql = "SELECT b.booking_id, " +
+                "       r.room_name, " +
+                "       u.full_name AS employee_name, " +
+                "       b.start_time, " +
+                "       b.end_time, " +
+                "       b.booking_status, " +
+                "       b.prep_status, " +
+                "       COALESCE(ss.full_name, '-') AS support_staff_name " +
+                "FROM bookings b " +
+                "JOIN rooms r ON r.room_id = b.room_id " +
+                "JOIN users u ON u.user_id = b.employee_id " +
+                "LEFT JOIN users ss ON ss.user_id = b.support_staff_id " +
+                "WHERE b.booking_status = 'PENDING' " +
+                "ORDER BY b.start_time DESC";
+
+        List<BookingDetail> details = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                details.add(mapBookingDetail(resultSet));
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the lay danh sach booking dang cho duyet.", ex);
+        }
+        return details;
     }
 
     /**
      * Lấy tất cả booking
-     * 
+     *
      * @return Danh sách tất cả BookingDetail
      */
     @Override
     public List<BookingDetail> findAllBookings() {
-        return findBookingDetails("");
+        String sql = "SELECT b.booking_id, " +
+                "       r.room_name, " +
+                "       u.full_name AS employee_name, " +
+                "       b.start_time, " +
+                "       b.end_time, " +
+                "       b.booking_status, " +
+                "       b.prep_status, " +
+                "       COALESCE(ss.full_name, '-') AS support_staff_name " +
+                "FROM bookings b " +
+                "JOIN rooms r ON r.room_id = b.room_id " +
+                "JOIN users u ON u.user_id = b.employee_id " +
+                "LEFT JOIN users ss ON ss.user_id = b.support_staff_id " +
+                "ORDER BY b.start_time DESC";
+
+        List<BookingDetail> details = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                details.add(mapBookingDetail(resultSet));
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the lay danh sach booking.", ex);
+        }
+        return details;
     }
 
     /**
      * Lấy danh sách booking của một nhân viên
-     * 
+     *
      * @param employeeId ID của nhân viên
      * @return Danh sách BookingDetail của nhân viên
      */
     @Override
     public List<BookingDetail> findByEmployee(int employeeId) {
-        return findBookingDetails("WHERE b.employee_id = " + employeeId);
+        String sql = "SELECT b.booking_id, " +
+                "       r.room_name, " +
+                "       u.full_name AS employee_name, " +
+                "       b.start_time, " +
+                "       b.end_time, " +
+                "       b.booking_status, " +
+                "       b.prep_status, " +
+                "       COALESCE(ss.full_name, '-') AS support_staff_name " +
+                "FROM bookings b " +
+                "JOIN rooms r ON r.room_id = b.room_id " +
+                "JOIN users u ON u.user_id = b.employee_id " +
+                "LEFT JOIN users ss ON ss.user_id = b.support_staff_id " +
+                "WHERE b.employee_id = ? " +
+                "ORDER BY b.start_time DESC";
+
+        List<BookingDetail> details = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, employeeId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    details.add(mapBookingDetail(resultSet));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the lay danh sach booking cua nhan vien.", ex);
+        }
+        return details;
     }
 
     /**
      * Lấy danh sách booking được giao cho một support staff
-     * 
+     *
      * @param supportStaffId ID của support staff
      * @return Danh sách BookingDetail được giao cho support staff
      */
     @Override
     public List<BookingDetail> findBySupportStaff(int supportStaffId) {
-        return findBookingDetails("WHERE b.support_staff_id = " + supportStaffId);
+        String sql = "SELECT b.booking_id, " +
+                "       r.room_name, " +
+                "       u.full_name AS employee_name, " +
+                "       b.start_time, " +
+                "       b.end_time, " +
+                "       b.booking_status, " +
+                "       b.prep_status, " +
+                "       COALESCE(ss.full_name, '-') AS support_staff_name " +
+                "FROM bookings b " +
+                "JOIN rooms r ON r.room_id = b.room_id " +
+                "JOIN users u ON u.user_id = b.employee_id " +
+                "LEFT JOIN users ss ON ss.user_id = b.support_staff_id " +
+                "WHERE b.support_staff_id = ? " +
+                "ORDER BY b.start_time DESC";
+
+        List<BookingDetail> details = new ArrayList<>();
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, supportStaffId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    details.add(mapBookingDetail(resultSet));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Khong the lay danh sach booking duoc giao cho support staff.", ex);
+        }
+        return details;
     }
 
     /**
@@ -410,29 +513,6 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
     }
 
     /**
-     * Tìm danh sách booking chi tiết theo điều kiện
-     * 
-     * @param whereClause Điều kiện WHERE (có thể rỗng)
-     * @return Danh sách BookingDetail
-     */
-    private List<BookingDetail> findBookingDetails(String whereClause) {
-        String sql = "SELECT b.booking_id, r.room_name, u.full_name AS employee_name, b.start_time, b.end_time, b.booking_status, b.prep_status, COALESCE(ss.full_name, '-') AS support_staff_name, COALESCE(eq.equipment_summary, '-') AS equipment_summary, COALESCE(sv.service_summary, '-') AS service_summary FROM bookings b JOIN rooms r ON r.room_id = b.room_id JOIN users u ON u.user_id = b.employee_id LEFT JOIN users ss ON ss.user_id = b.support_staff_id LEFT JOIN (SELECT be.booking_id, GROUP_CONCAT(CONCAT(e.equipment_name, ' x', be.quantity) ORDER BY e.equipment_name SEPARATOR ', ') AS equipment_summary FROM booking_equipments be JOIN equipments e ON e.equipment_id = be.equipment_id GROUP BY be.booking_id) eq ON eq.booking_id = b.booking_id LEFT JOIN (SELECT bs.booking_id, GROUP_CONCAT(CONCAT(s.service_name, ' x', bs.quantity) ORDER BY s.service_name SEPARATOR ', ') AS service_summary FROM booking_services bs JOIN services s ON s.service_id = bs.service_id GROUP BY bs.booking_id) sv ON sv.booking_id = b.booking_id %s ORDER BY b.start_time DESC"
-                .formatted(whereClause);
-
-        List<BookingDetail> details = new ArrayList<>();
-        try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                details.add(mapBookingDetail(resultSet));
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Khong the lay danh sach booking chi tiet.", ex);
-        }
-        return details;
-    }
-
-    /**
      * Chuyển đổi ResultSet sang đối tượng Booking
      * 
      * @param resultSet ResultSet từ database
@@ -476,8 +556,6 @@ public class BookingDaoImpl extends BaseDao implements BookingDao {
         detail.setBookingStatus(resultSet.getString("booking_status"));
         detail.setPrepStatus(resultSet.getString("prep_status"));
         detail.setSupportStaffName(resultSet.getString("support_staff_name"));
-        detail.setEquipmentSummary(resultSet.getString("equipment_summary"));
-        detail.setServiceSummary(resultSet.getString("service_summary"));
         return detail;
     }
 
